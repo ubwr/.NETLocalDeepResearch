@@ -1,11 +1,11 @@
 @page "/"
 @rendermode InteractiveServer
 
-<PageTitle>Local Deep Research</PageTitle>
+<PageTitle>@Strings.AppTitle</PageTitle>
 
 <div class="d-flex align-center justify-center" style="min-height: 90vh;">
     <MudTextField @bind-Value="_question"
-                  Placeholder="What do you want to research?"
+                  Placeholder="@Strings.SearchPlaceholder"
                   Variant="Variant.Outlined"
                   Adornment="Adornment.Start"
                   AdornmentIcon="@Icons.Material.Outlined.Search"
