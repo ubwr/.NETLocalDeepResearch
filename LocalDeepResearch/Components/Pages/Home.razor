@@ -3,16 +3,31 @@
 
 <PageTitle>@Strings.AppTitle</PageTitle>
 
-<div class="d-flex align-center justify-center" style="min-height: 90vh;">
+<MudStack Spacing="4" Class="py-8">
     <MudTextField @bind-Value="_question"
                   Placeholder="@Strings.SearchPlaceholder"
                   Variant="Variant.Outlined"
                   Adornment="Adornment.Start"
                   AdornmentIcon="@Icons.Material.Outlined.Search"
                   Immediate="true"
+                  Disabled="_busy"
+                  OnKeyDown="OnKeyDown"
                   FullWidth="true"/>
-</div>
 
-@code {
-    private string? _question;
-}
+    @if (_busy)
+    {
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary"/>
+    }
+
+    @if (_error is not null)
+    {
+        <MudAlert Severity="Severity.Error">@_error</MudAlert>
+    }
+
+    @if (_answer is not null)
+    {
+        <MudPaper Class="pa-4" Elevation="0" Outlined="true">
+            <MudText Typo="Typo.body1" Style="white-space: pre-wrap;">@_answer</MudText>
+        </MudPaper>
+    }
+</MudStack>

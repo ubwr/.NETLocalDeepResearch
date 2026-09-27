@@ -17,8 +17,6 @@ public class BonsaiClient
     public BonsaiClient(HttpClient http)
     {
         _http = http;
-        _http.BaseAddress = new Uri("http://localhost:8081");
-        _http.Timeout = TimeSpan.FromMinutes(10);
     }
     /// <summary>
     /// Sends our <see cref="CompletionRequest"/> to our local API and returns a <see cref="ResponseMessage"/>.
