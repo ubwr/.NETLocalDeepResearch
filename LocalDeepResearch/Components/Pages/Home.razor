@@ -1,7 +1,18 @@
-﻿@page "/"
+@page "/"
+@rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Local Deep Research</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="d-flex align-center justify-center" style="min-height: 90vh;">
+    <MudTextField @bind-Value="_question"
+                  Placeholder="What do you want to research?"
+                  Variant="Variant.Outlined"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Outlined.Search"
+                  Immediate="true"
+                  FullWidth="true"/>
+</div>
 
-Welcome to your new app.
+@code {
+    private string? _question;
+}
