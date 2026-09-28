@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace LocalDeepResearch.Services;
 /// <summary>
@@ -13,10 +14,12 @@ public class BonsaiClient
     };
 
     private readonly HttpClient _http;
+    private readonly BonsaiOptions _options;
 
-    public BonsaiClient(HttpClient http)
+    public BonsaiClient(HttpClient http, IOptions<BonsaiOptions> options)
     {
         _http = http;
+        _options = options.Value;
     }
     /// <summary>
     /// Sends our <see cref="CompletionRequest"/> to our local API and returns a <see cref="ResponseMessage"/>.
@@ -28,9 +31,9 @@ public class BonsaiClient
     {
         var request = new CompletionRequest(
             Messages: [new RequestMessage("user", question)],
-            ReasoningEffort: "medium",
-            MaxTokens: 2000,
-            Temperature: 0.3);
+            ReasoningEffort: _options.ReasoningEffort,
+            MaxTokens: _options.MaxTokens,
+            Temperature: _options.Temperature);
 
         using var response = await _http.PostAsJsonAsync("/v1/chat/completions", request, Json, ct);
         response.EnsureSuccessStatusCode();

@@ -1,5 +1,6 @@
 using LocalDeepResearch.Components;
 using LocalDeepResearch.Services;
+using Microsoft.Extensions.Options;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,10 +11,13 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddMudServices();
 
-builder.Services.AddHttpClient<BonsaiClient>(client =>
+builder.Services.Configure<BonsaiOptions>(builder.Configuration.GetSection("Bonsai"));
+
+builder.Services.AddHttpClient<BonsaiClient>((serviceProvider, client) =>
 {
-    client.BaseAddress = new Uri("http://localhost:8081");
-    client.Timeout = TimeSpan.FromMinutes(10);
+    var options = serviceProvider.GetRequiredService<IOptions<BonsaiOptions>>().Value;
+    client.BaseAddress = new Uri(options.Url);
+    client.Timeout = TimeSpan.FromMinutes(options.TimeoutMinutes);
 });
 
 var app = builder.Build();
