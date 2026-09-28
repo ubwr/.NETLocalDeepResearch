@@ -20,6 +20,15 @@ builder.Services.AddHttpClient<BonsaiClient>((serviceProvider, client) =>
     client.Timeout = TimeSpan.FromMinutes(options.TimeoutMinutes);
 });
 
+builder.Services.Configure<SearxngOptions>(builder.Configuration.GetSection("Searxng"));
+
+builder.Services.AddHttpClient<SearxngClient>((serviceProvider, client) =>
+{
+    var options = serviceProvider.GetRequiredService<IOptions<SearxngOptions>>().Value;
+    client.BaseAddress = new Uri(options.Url);
+    client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
