@@ -7,11 +7,16 @@ namespace LocalDeepResearch.Components.Pages;
 public partial class Home
 {
     [Inject] private BonsaiClient Bonsai { get; set; }
+    [Inject] private SearxngClient Searxng { get; set; }
 
     private string? _question;
     private string? _answer;
     private string? _error;
     private bool _busy;
+    /// <summary>
+    /// Full list of search results.
+    /// </summary>
+    private IReadOnlyList<SearchResult> _results = [];
 
     /// <summary>
     /// When the user hits 'Enter', fire off the API call to use our local models.
@@ -33,9 +38,13 @@ public partial class Home
         _busy = true;
         _error = null;
         _answer = null;
+        _results = [];
 
         try
         {
+            _results = await Searxng.SearchAsync(_question.Trim());
+            StateHasChanged();
+
             _answer = await Bonsai.AskAsync(_question.Trim());
         }
         catch (Exception ex)
