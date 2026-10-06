@@ -13,12 +13,7 @@ builder.Services.AddMudServices();
 
 builder.Services.Configure<BonsaiOptions>(builder.Configuration.GetSection("Bonsai"));
 
-builder.Services.AddHttpClient<BonsaiClient>((serviceProvider, client) =>
-{
-    var options = serviceProvider.GetRequiredService<IOptions<BonsaiOptions>>().Value;
-    client.BaseAddress = new Uri(options.Url);
-    client.Timeout = TimeSpan.FromMinutes(options.TimeoutMinutes);
-});
+builder.Services.AddSingleton<BonsaiClient>();
 
 builder.Services.Configure<SearxngOptions>(builder.Configuration.GetSection("Searxng"));
 

@@ -4,17 +4,29 @@
 <PageTitle>@Strings.AppTitle</PageTitle>
 
 <MudStack Spacing="4" Class="py-8">
-    <MudTextField @bind-Value="_question"
+    <MudTextField @bind-Value="_prompt"
                   Placeholder="@Strings.SearchPlaceholder"
                   Variant="Variant.Outlined"
                   Adornment="Adornment.Start"
                   AdornmentIcon="@Icons.Material.Outlined.Search"
                   Immediate="true"
-                  Disabled="_busy"
+                  Disabled="_busy || _loadingModel"
                   OnKeyDown="OnKeyDown"
                   FullWidth="true"/>
 
-    @if (_busy)
+    @if (_loadingModel)
+    {
+        <MudStack Spacing="1">
+            <MudProgressLinear Value="@_downloadPercent"
+                               Color="Color.Primary"
+                               Rounded="true"/>
+            <MudStack Row="true" Justify="Justify.SpaceBetween">
+                <MudText Typo="Typo.caption">@_loadingStatus</MudText>
+                <MudText Typo="Typo.caption">@_downloadPercent%</MudText>
+            </MudStack>
+        </MudStack>
+    }
+    else if (_busy)
     {
         <MudProgressLinear Indeterminate="true" Color="Color.Primary"/>
     }

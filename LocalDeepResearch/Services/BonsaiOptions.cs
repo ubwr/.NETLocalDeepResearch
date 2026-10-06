@@ -5,9 +5,8 @@ namespace LocalDeepResearch.Services;
 /// </summary>
 public class BonsaiOptions
 {
-    public string Url { get; set; } = "http://localhost:8081";
-    public string ReasoningEffort { get; set; } = "medium";
+    public string ModelId { get; set; } = "Qwen/Qwen3-8B-GGUF";
+    public string? ServerBinaryPath { get; set; }
     public int MaxTokens { get; set; } = 2000;
     public double Temperature { get; set; } = 0.3;
-    public int TimeoutMinutes { get; set; } = 10;
 }

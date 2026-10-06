@@ -1,5 +1,8 @@
-using System.Net.Http.Json;
-using System.Text.Json;
+using LMSupply;
+using LMSupply.Generator;
+using LMSupply.Llama.Server;
+using LMSupply.Generator.Abstractions;
+using LMSupply.Generator.Models;
 using Microsoft.Extensions.Options;
 
 namespace LocalDeepResearch.Services;
@@ -8,75 +11,66 @@ namespace LocalDeepResearch.Services;
 /// </summary>
 public class BonsaiClient
 {
-    private static readonly JsonSerializerOptions Json = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-    };
-
-    private readonly HttpClient _http;
     private readonly BonsaiOptions _options;
+    private IGeneratorModel? _generatorModel;
 
-    public BonsaiClient(HttpClient http, IOptions<BonsaiOptions> options)
+    public BonsaiClient(IOptions<BonsaiOptions> options)
     {
-        _http = http;
         _options = options.Value;
     }
+
     /// <summary>
-    /// Sends our <see cref="CompletionRequest"/> to our local API and returns a <see cref="ResponseMessage"/>.
+    /// If our local LLM is loaded.
     /// </summary>
-    /// <param name="question"> Research question being asked </param>
+    public bool IsModelLoaded => _generatorModel is not null;
+
+    /// <summary>
+    /// Does the initial loading of our local LLM.
+    /// </summary>
+    /// <param name="progress"> Current download progress for our local LLM </param>
     /// <param name="ct"> Cancellation token </param>
-    /// <returns> The response message from a choice in our <see cref="CompletionResponse"/> </returns>
-    public async Task<string> AskAsync(string question, CancellationToken ct = default)
+    public async Task LoadAsync(IProgress<DownloadProgress>? progress = null, CancellationToken ct = default)
     {
-        var request = new CompletionRequest(
-            Messages: [new RequestMessage("user", question)],
-            ReasoningEffort: _options.ReasoningEffort,
-            MaxTokens: _options.MaxTokens,
-            Temperature: _options.Temperature);
+        if (IsModelLoaded)
+            return;
 
-        using var response = await _http.PostAsJsonAsync("/v1/chat/completions", request, Json, ct);
-        response.EnsureSuccessStatusCode();
+        var generatorOptions = new GeneratorOptions();
 
-        var completion = await response.Content.ReadFromJsonAsync<CompletionResponse>(Json, ct);
-        return completion?.Choices.FirstOrDefault()?.Message.Content ?? string.Empty;
+        // Allow custom locations for llama server installations
+        if (!string.IsNullOrWhiteSpace(_options.ServerBinaryPath))
+        {
+            generatorOptions.ServerUpdateOptions = new LlamaServerUpdateOptions
+            {
+                ServerBinaryPath = _options.ServerBinaryPath
+            };
+        }
+
+        _generatorModel = await LocalGenerator.LoadAsync(
+            _options.ModelId,
+            generatorOptions,
+            progress: progress,
+            cancellationToken: ct);
     }
     /// <summary>
-    /// The message that we send in our <see cref="CompletionRequest"/>.
+    /// Sends a request to our local LLM with a given prompt.
     /// </summary>
-    /// <param name="Role"> Role for this message (system, user, assistant) </param>
-    /// <param name="Content"> Message content </param>
-    private record RequestMessage(string Role, string Content);
-    /// <summary>
-    /// The request that we send to our local API.
-    /// </summary>
-    /// <param name="Messages"> The messages we're sending to the model </param>
-    /// <param name="ReasoningEffort"> Model effort (low, medium, xhigh) </param>
-    /// <param name="MaxTokens"> Maximum number of tokens we want back in the response, including reasoning </param>
-    /// <param name="Temperature"> How creative the model can be in its response </param>
-    /// <param name="N"> Number of choices we get back in the completed response </param>
-    private record CompletionRequest(
-        IReadOnlyList<RequestMessage> Messages,
-        string ReasoningEffort,
-        int MaxTokens,
-        double Temperature,
-        int N = 1);
-    /// <summary>
-    /// List of choices that we get back in response to our prompt.
-    /// Number of choices we want in the response is specified when calling <see cref="CompletionRequest"/>
-    /// </summary>
-    /// <param name="Choices"> List of choices in the completed response </param>
-    private record CompletionResponse(IReadOnlyList<Choice> Choices);
-    /// <summary>
-    /// A single completion for this prompt. 
-    /// </summary>
-    /// <param name="Message"> The completed response </param>
-    /// <param name="FinishReason"> The reason why the model finished </param>
-    private record Choice(ResponseMessage Message, string FinishReason);
-    /// <summary>
-    /// A single response message that we get back from calls to our local LLM.
-    /// </summary>
-    /// <param name="Content"> Completed message to our original prompt </param>
-    /// <param name="ReasoningContent"> Thought process that lead to the completed message </param>
-    private record ResponseMessage(string Content, string? ReasoningContent);
+    /// <param name="prompt"> Prompt for our local LLM </param>
+    /// <param name="ct"> Cancellation token </param>
+    /// <returns> Response from model </returns>
+    /// <exception cref="InvalidOperationException"> Error when LLM is not loaded </exception>
+    public async Task<string> AskAsync(string prompt, CancellationToken ct = default)
+    {
+        if (!IsModelLoaded)
+            throw new InvalidOperationException("Selected LLM is not loaded.");
+
+        return await _generatorModel.GenerateChatCompleteAsync(
+            [new ChatMessage { Role = ChatRole.User, Content = prompt }],
+            new GenerationOptions
+            {
+                MaxTokens = _options.MaxTokens,
+                Temperature = (float)_options.Temperature,
+                FilterReasoningTokens = true
+            },
+            ct);
+    }
 }

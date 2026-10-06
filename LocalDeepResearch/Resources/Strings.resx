@@ -70,6 +70,9 @@
   <data name="ErrorReload" xml:space="preserve">
     <value>Reload</value>
   </data>
+  <data name="ModelPreparing" xml:space="preserve">
+    <value>Preparing model…</value>
+  </data>
   <data name="ErrorDismiss" xml:space="preserve">
     <value>🗙</value>
   </data>

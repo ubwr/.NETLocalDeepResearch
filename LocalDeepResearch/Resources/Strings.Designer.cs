@@ -68,6 +68,12 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
+        internal static string ModelPreparing {
+            get {
+                return ResourceManager.GetString("ModelPreparing", resourceCulture);
+            }
+        }
+
         internal static string SearchPlaceholder {
             get {
                 return ResourceManager.GetString("SearchPlaceholder", resourceCulture);

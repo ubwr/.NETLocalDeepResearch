@@ -15,6 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="LMSupply.Generator" Version="0.105.2" />
       <PackageReference Include="MudBlazor" Version="9.10.0" />
     </ItemGroup>
 
