@@ -76,4 +76,7 @@
   <data name="ErrorDismiss" xml:space="preserve">
     <value>🗙</value>
   </data>
+  <data name="TokenCount" xml:space="preserve">
+    <value>{0} tokens</value>
+  </data>
 </root>

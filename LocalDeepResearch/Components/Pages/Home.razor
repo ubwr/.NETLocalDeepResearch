@@ -9,18 +9,18 @@
                   Variant="Variant.Outlined"
                   Adornment="Adornment.Start"
                   AdornmentIcon="@Icons.Material.Outlined.Search"
-                  Immediate="true"
+                  Immediate
                   Disabled="_busy || _loadingModel"
                   OnKeyDown="OnKeyDown"
-                  FullWidth="true"/>
+                  FullWidth />
 
     @if (_loadingModel)
     {
         <MudStack Spacing="1">
             <MudProgressLinear Value="@_downloadPercent"
                                Color="Color.Primary"
-                               Rounded="true"/>
-            <MudStack Row="true" Justify="Justify.SpaceBetween">
+                               Rounded />
+            <MudStack Row Justify="Justify.SpaceBetween">
                 <MudText Typo="Typo.caption">@_loadingStatus</MudText>
                 <MudText Typo="Typo.caption">@_downloadPercent%</MudText>
             </MudStack>
@@ -28,7 +28,18 @@
     }
     else if (_busy)
     {
-        <MudProgressLinear Indeterminate="true" Color="Color.Primary"/>
+        <MudProgressLinear Indeterminate Color="Color.Primary"/>
+    }
+
+    @if (Bonsai.IsModelLoaded)
+    {
+        <MudChip T="string"
+                 Size="Size.Small"
+                 Variant="Variant.Outlined"
+                 Class="align-self-start"
+                 Color="@(Bonsai.IsGpuActive ? Color.Success : Color.Warning)">
+            @(Bonsai.IsGpuActive ? "GPU" : "CPU")
+        </MudChip>
     }
 
     @if (_error is not null)
@@ -38,14 +49,27 @@
 
     @if (_answer is not null)
     {
-        <MudPaper Class="pa-4" Elevation="0" Outlined="true">
+        <MudPaper Class="pa-4" Elevation="0" Outlined>
             <MudText Typo="Typo.body1" Style="white-space: pre-wrap;">@_answer</MudText>
+
+            @if (Bonsai.Result.HasValue)
+            {
+                var result = Bonsai.Result.Value;
+                var tokensPerSecond = result.Timings?.CompletionTokensPerSecond ?? 0;
+                var duration = result.Timings?.CompletionDuration ?? TimeSpan.Zero;
+
+                <MudStack Row Spacing="3" Class="mt-4">
+                    <MudText Typo="Typo.caption">@($"{tokensPerSecond:F1} tok/s")</MudText>
+                    <MudText Typo="Typo.caption">@string.Format(Strings.TokenCount, result.Usage.CompletionTokens)</MudText>
+                    <MudText Typo="Typo.caption">@Helpers.FormatDuration(duration)</MudText>
+                </MudStack>
+            }
         </MudPaper>
     }
 
     @if (_results.Count > 0 && _scores.Length == _results.Count)
     {
-        <MudPaper Class="pa-4" Elevation="0" Outlined="true">
+        <MudPaper Class="pa-4" Elevation="0" Outlined>
             <MudText Typo="Typo.overline">@_keptCount / @_results.Count</MudText>
             <MudStack Spacing="1">
                 @for (var i = 0; i < _results.Count; i++)
@@ -56,7 +80,7 @@
                     var result = _results[i];
                     var score = _scores[i];
 
-                    <MudStack Row="true" Spacing="2">
+                    <MudStack Row Spacing="2">
                         <MudLink Href="@result.Url" Target="_blank" rel="noopener noreferrer" Typo="Typo.body2">@result.Title</MudLink>
                         <MudText Typo="Typo.caption">@result.Engine</MudText>
                         <MudText Typo="Typo.caption" Color="Color.Success">@score.ToString("P0")</MudText>

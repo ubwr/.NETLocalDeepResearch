@@ -79,5 +79,11 @@ namespace LocalDeepResearch.Resources {
                 return ResourceManager.GetString("SearchPlaceholder", resourceCulture);
             }
         }
+
+        internal static string TokenCount {
+            get {
+                return ResourceManager.GetString("TokenCount", resourceCulture);
+            }
+        }
     }
 }

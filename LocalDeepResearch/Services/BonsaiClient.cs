@@ -23,6 +23,14 @@ public class BonsaiClient
     /// If our local LLM is loaded.
     /// </summary>
     public bool IsModelLoaded => _generatorModel is not null;
+    /// <summary>
+    /// If we are using a GPU for inference.
+    /// </summary>
+    public bool IsGpuActive => _generatorModel?.IsGpuActive ?? false;
+    /// <summary>
+    /// Result of the local LLM text generation.
+    /// </summary>
+    public GenerationResult? Result { get; private set; }
 
     /// <summary>
     /// Does the initial loading of our local LLM.
@@ -33,8 +41,12 @@ public class BonsaiClient
     {
         if (IsModelLoaded)
             return;
-
-        var generatorOptions = new GeneratorOptions();
+        
+        // Allow custom context lengths
+        var generatorOptions = new GeneratorOptions
+        {
+            MaxContextLength = _options.MaxContextLength
+        };
 
         // Allow custom locations for llama server installations
         if (!string.IsNullOrWhiteSpace(_options.ServerBinaryPath))
@@ -63,7 +75,7 @@ public class BonsaiClient
         if (!IsModelLoaded)
             throw new InvalidOperationException("Selected LLM is not loaded.");
 
-        return await _generatorModel.GenerateChatCompleteAsync(
+        var result = await _generatorModel.GenerateChatCompleteResultAsync(
             [new ChatMessage { Role = ChatRole.User, Content = prompt }],
             new GenerationOptions
             {
@@ -72,5 +84,9 @@ public class BonsaiClient
                 FilterReasoningTokens = true
             },
             ct);
+
+        Result = result;
+
+        return result.Content;
     }
 }
