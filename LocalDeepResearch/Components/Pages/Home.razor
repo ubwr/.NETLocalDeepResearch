@@ -43,17 +43,24 @@
         </MudPaper>
     }
 
-    @if (_results.Count > 0)
+    @if (_results.Count > 0 && _scores.Length == _results.Count)
     {
         <MudPaper Class="pa-4" Elevation="0" Outlined="true">
-            <MudText Typo="Typo.overline">@_results.Count</MudText>
+            <MudText Typo="Typo.overline">@_keptCount / @_results.Count</MudText>
             <MudStack Spacing="1">
-                @foreach (var result in _results)
+                @for (var i = 0; i < _results.Count; i++)
                 {
-                    <div>
+                    if (_scores[i] < Reranker.Threshold)
+                        continue;
+
+                    var result = _results[i];
+                    var score = _scores[i];
+
+                    <MudStack Row="true" Spacing="2">
                         <MudLink Href="@result.Url" Target="_blank" rel="noopener noreferrer" Typo="Typo.body2">@result.Title</MudLink>
-                        <MudText Typo="Typo.caption" Class="ml-2">@result.Engine</MudText>
-                    </div>
+                        <MudText Typo="Typo.caption">@result.Engine</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Success">@score.ToString("P0")</MudText>
+                    </MudStack>
                 }
             </MudStack>
         </MudPaper>

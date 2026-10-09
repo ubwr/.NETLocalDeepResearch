@@ -15,6 +15,10 @@ builder.Services.Configure<BonsaiOptions>(builder.Configuration.GetSection("Bons
 
 builder.Services.AddSingleton<BonsaiClient>();
 
+builder.Services.Configure<RerankerOptions>(builder.Configuration.GetSection("Reranker"));
+
+builder.Services.AddSingleton<RerankerClient>();
+
 builder.Services.Configure<SearxngOptions>(builder.Configuration.GetSection("Searxng"));
 
 builder.Services.AddHttpClient<SearxngClient>((serviceProvider, client) =>

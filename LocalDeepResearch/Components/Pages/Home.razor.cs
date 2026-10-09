@@ -10,23 +10,53 @@ public partial class Home
 {
     [Inject] private BonsaiClient Bonsai { get; set; }
     [Inject] private SearxngClient Searxng { get; set; }
+    [Inject] private RerankerClient Reranker { get; set; }
 
+    /// <summary>
+    /// Prompt to the local LLM.
+    /// </summary>
     private string? _prompt;
+    /// <summary>
+    /// Response from the local LLM.
+    /// </summary>
     private string? _answer;
+    /// <summary>
+    /// Error message.
+    /// </summary>
     private string? _error;
+    /// <summary>
+    /// If a prompt is already being processed.
+    /// </summary>
     private bool _busy;
     /// <summary>
     /// Full list of search results.
     /// </summary>
     private IReadOnlyList<SearchResult> _results = [];
-
+    /// <summary>
+    /// Scores that correspond to the full list of search results.
+    /// </summary>
+    private float[] _scores = [];
+    /// <summary>
+    /// How many sources passed the reranker.
+    /// </summary>
+    private int _keptCount;
+    /// <summary>
+    /// If we are actively loading the model.
+    /// </summary>
     private bool _loadingModel;
+    /// <summary>
+    /// Model download percentage.
+    /// </summary>
     private int _downloadPercent;
+    /// <summary>
+    /// Description of the current loading status for the user.
+    /// </summary>
     private string? _loadingStatus;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || Bonsai.IsModelLoaded)
+        // Exit early if our models are already downloaded
+        if (!firstRender || (Bonsai.IsModelLoaded && Reranker.IsModelLoaded))
             return;
 
         _loadingModel = true;
@@ -43,6 +73,7 @@ public partial class Home
         try
         {
             await Bonsai.LoadAsync(progress);
+            await Reranker.LoadAsync(progress);
         }
         catch (Exception ex)
         {
@@ -76,13 +107,25 @@ public partial class Home
         _error = null;
         _answer = null;
         _results = [];
+        _scores = [];
+        _keptCount = 0;
 
         try
         {
-            _results = await Searxng.SearchAsync(_prompt.Trim());
+            var query = _prompt.Trim();
+
+            _results = await Searxng.SearchAsync(query);
             StateHasChanged();
 
-            _answer = await Bonsai.AskAsync(_prompt.Trim());
+            if (_results.Count > 0)
+            {
+                var documents = _results.Select(r => $"{r.Title} {r.Content}").ToList();
+                _scores = await Reranker.ScoreAsync(query, documents);
+                _keptCount = _scores.Count(score => score >= Reranker.Threshold);
+                StateHasChanged();
+            }
+
+            _answer = await Bonsai.AskAsync(query);
         }
         catch (Exception ex)
         {
