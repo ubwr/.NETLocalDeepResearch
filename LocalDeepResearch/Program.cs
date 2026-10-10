@@ -11,9 +11,9 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddMudServices();
 
-builder.Services.Configure<BonsaiOptions>(builder.Configuration.GetSection("Bonsai"));
+builder.Services.Configure<ChatOptions>(builder.Configuration.GetSection("Chat"));
 
-builder.Services.AddSingleton<BonsaiClient>();
+builder.Services.AddSingleton<ChatClient>();
 
 builder.Services.Configure<RerankerOptions>(builder.Configuration.GetSection("Reranker"));
 

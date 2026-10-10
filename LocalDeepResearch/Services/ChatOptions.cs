@@ -3,7 +3,7 @@ namespace LocalDeepResearch.Services;
 /// <summary>
 /// Options configuration for our local LLM.
 /// </summary>
-public class BonsaiOptions
+public class ChatOptions
 {
     public string ModelId { get; set; } = "Qwen/Qwen3-8B-GGUF";
     public string? ServerBinaryPath { get; set; }

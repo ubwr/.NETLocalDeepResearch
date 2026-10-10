@@ -39,14 +39,14 @@
         </MudStack>
     }
 
-    @if (Bonsai.IsModelLoaded)
+    @if (Chat.IsModelLoaded)
     {
         <MudChip T="string"
                  Size="Size.Small"
                  Variant="Variant.Outlined"
                  Class="align-self-start"
-                 Color="@(Bonsai.IsGpuActive ? Color.Success : Color.Warning)">
-            @(Bonsai.IsGpuActive ? "GPU" : "CPU")
+                 Color="@(Chat.IsGpuActive ? Color.Success : Color.Warning)">
+            @(Chat.IsGpuActive ? "GPU" : "CPU")
         </MudChip>
     }
 
@@ -68,9 +68,9 @@
                 }
             </MudStack>
 
-            @if (Bonsai.Result.HasValue)
+            @if (Chat.Result.HasValue)
             {
-                var result = Bonsai.Result.Value;
+                var result = Chat.Result.Value;
                 double tokensPerSecond = result.Timings?.CompletionTokensPerSecond ?? 0;
                 TimeSpan duration = result.Timings?.CompletionDuration ?? TimeSpan.Zero;
 

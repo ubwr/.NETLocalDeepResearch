@@ -9,12 +9,12 @@ namespace LocalDeepResearch.Services;
 /// <summary>
 /// Client for interacting with our locally running LLM.
 /// </summary>
-public class BonsaiClient
+public class ChatClient
 {
-    private readonly BonsaiOptions _options;
+    private readonly ChatOptions _options;
     private IGeneratorModel? _generatorModel;
 
-    public BonsaiClient(IOptions<BonsaiOptions> options)
+    public ChatClient(IOptions<ChatOptions> options)
     {
         _options = options.Value;
     }

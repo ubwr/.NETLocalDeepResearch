@@ -21,7 +21,7 @@ public partial class Home
     /// </summary>
     private const int MinSites = 2;
 
-    [Inject] private BonsaiClient Bonsai { get; set; }
+    [Inject] private ChatClient Chat { get; set; }
     [Inject] private SearxngClient Searxng { get; set; }
     [Inject] private RerankerClient Reranker { get; set; }
     [Inject] private PageClient Pages { get; set; }
@@ -82,7 +82,7 @@ public partial class Home
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         // Exit early if our models are already downloaded
-        if (!firstRender || (Bonsai.IsModelLoaded && Reranker.IsModelLoaded))
+        if (!firstRender || (Chat.IsModelLoaded && Reranker.IsModelLoaded))
             return;
 
         _loadingModel = true;
@@ -98,7 +98,7 @@ public partial class Home
 
         try
         {
-            await Bonsai.LoadAsync(progress);
+            await Chat.LoadAsync(progress);
             await Reranker.LoadAsync(progress);
         }
         catch (Exception ex)
@@ -143,8 +143,8 @@ public partial class Home
             string query = _prompt.Trim();
 
             // Get our token count before adding any passages
-            int fixedTokens = await Bonsai.CountPromptTokensAsync(PromptHelper.SystemMessage, PromptHelper.Question(query));
-            _passageTokenBudget = Bonsai.PromptTokenBudget - fixedTokens;
+            int fixedTokens = await Chat.CountPromptTokensAsync(PromptHelper.SystemMessage, PromptHelper.Question(query));
+            _passageTokenBudget = Chat.PromptTokenBudget - fixedTokens;
 
             _results = await Searxng.SearchAsync(query);
             StateHasChanged();
@@ -181,7 +181,7 @@ public partial class Home
             StateHasChanged();
 
             string userMessage = PromptHelper.UserMessage(_selected, query);
-            _answer = await Bonsai.AskAsync(PromptHelper.SystemMessage, userMessage);
+            _answer = await Chat.AskAsync(PromptHelper.SystemMessage, userMessage);
         }
         catch (Exception ex)
         {
@@ -242,7 +242,7 @@ public partial class Home
                     if (scores[i] < Reranker.Threshold)
                         continue;
 
-                    int tokens = await Bonsai.CountTokensAsync(PromptHelper.Document(passages[i].Text));
+                    int tokens = await Chat.CountTokensAsync(PromptHelper.Document(passages[i].Text));
                     relevantPassages.Add(new ScoredPassage(passages[i], scores[i], tokens));
                     relevantPassageTokens += tokens;
                 }
