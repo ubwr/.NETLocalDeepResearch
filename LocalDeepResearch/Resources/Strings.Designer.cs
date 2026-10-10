@@ -85,5 +85,23 @@ namespace LocalDeepResearch.Resources {
                 return ResourceManager.GetString("TokenCount", resourceCulture);
             }
         }
+
+        internal static string StatusGathering {
+            get {
+                return ResourceManager.GetString("StatusGathering", resourceCulture);
+            }
+        }
+
+        internal static string StatusSelected {
+            get {
+                return ResourceManager.GetString("StatusSelected", resourceCulture);
+            }
+        }
+
+        internal static string NotEnoughSources {
+            get {
+                return ResourceManager.GetString("NotEnoughSources", resourceCulture);
+            }
+        }
     }
 }

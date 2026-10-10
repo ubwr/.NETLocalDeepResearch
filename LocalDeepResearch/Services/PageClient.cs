@@ -23,7 +23,7 @@ public class PageClient
     /// <exception cref="HttpRequestException"> Error from webpage </exception>
     /// <exception cref="InvalidOperationException"> Error getting content from this page </exception>
     /// <exception cref="TaskCanceledException"> Request was cancelled </exception>
-    public async Task<ExtractResult> ExtractAsync(string url, CancellationToken ct = default)
+    public async Task<string> ExtractAsync(string url, CancellationToken ct = default)
     {
         string html;
 
@@ -49,7 +49,7 @@ public class PageClient
                 enableFallback = true,  // Enable readability fallback for difficult pages
                 excludeTables = true    // Excludes table elements from result
             };
-            return Extractor.Extract(html, options);
+            return Extractor.Extract(html, options).contentHtml;
         }
         catch (TrafilaturaException ex)
         {

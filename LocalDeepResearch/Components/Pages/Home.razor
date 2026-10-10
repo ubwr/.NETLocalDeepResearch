@@ -1,5 +1,6 @@
 @page "/"
 @rendermode InteractiveServer
+@using LocalDeepResearch.Services
 
 <PageTitle>@Strings.AppTitle</PageTitle>
 
@@ -28,7 +29,13 @@
     }
     else if (_busy)
     {
-        <MudProgressLinear Indeterminate Color="Color.Primary"/>
+        <MudStack Spacing="1">
+            <MudProgressLinear Indeterminate Color="Color.Primary"/>
+            @if (_runStatus is not null)
+            {
+                <MudText Typo="Typo.caption">@_runStatus</MudText>
+            }
+        </MudStack>
     }
 
     @if (Bonsai.IsModelLoaded)
@@ -64,6 +71,28 @@
                     <MudText Typo="Typo.caption">@Helpers.FormatDuration(duration)</MudText>
                 </MudStack>
             }
+        </MudPaper>
+    }
+
+    @if (_selected.Count > 0)
+    {
+        var selectedTokens = _selected.Sum(passage => passage.Tokens);
+        var sourceCount = ContextBuilder.CountSources(_selected);
+
+        <MudPaper Class="pa-4" Elevation="0" Outlined>
+            <MudText Typo="Typo.overline">@($"Debug: {_selected.Count} passages, {selectedTokens} / {PromptBudget} tokens, {sourceCount} sources")</MudText>
+
+            <MudStack Spacing="2" Class="mt-2">
+                @foreach (var selected in _selected)
+                {
+                    var preview = selected.Passage.Text.Length > 200 ? selected.Passage.Text[..200] + "…" : selected.Passage.Text;
+
+                    <MudPaper Class="pa-3" Elevation="0" Outlined>
+                        <MudText Typo="Typo.caption">@($"{selected.Score:P1} | {selected.Passage.Host} | {selected.Tokens} tokens")</MudText>
+                        <MudText Typo="Typo.body2" Class="mt-1" Style="white-space: pre-wrap;">@preview</MudText>
+                    </MudPaper>
+                }
+            </MudStack>
         </MudPaper>
     }
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
@@ -78,5 +78,14 @@
   </data>
   <data name="TokenCount" xml:space="preserve">
     <value>{0} tokens</value>
+  </data>
+  <data name="StatusGathering" xml:space="preserve">
+    <value>Reading sources: {0} of {1} pages, {2} passages kept</value>
+  </data>
+  <data name="StatusSelected" xml:space="preserve">
+    <value>Selected {0} of {1} passages</value>
+  </data>
+  <data name="NotEnoughSources" xml:space="preserve">
+    <value>Not enough relevant sources were found to answer this question.</value>
   </data>
 </root>

@@ -129,4 +129,7 @@ public static class Chunker
 /// <param name="Url"> URL that contains this passage </param>
 /// <param name="Title"> Title of the page that contains this passage</param>
 /// <param name="Text"> Text content from the page </param>
-public record Passage(string Url, string Title, string Text);
+public record Passage(string Url, string Title, string Text)
+{
+    public string Host => new Uri(Url).Host;
+}

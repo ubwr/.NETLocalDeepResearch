@@ -31,6 +31,10 @@ public class BonsaiClient
     /// Result of the local LLM text generation.
     /// </summary>
     public GenerationResult? Result { get; private set; }
+    /// <summary>
+    /// Maximum number of tokens we can use as context for a prompt.
+    /// </summary>
+    public int PromptBudget => (_generatorModel?.MaxContextLength ?? 0) - _options.MaxTokens;
 
     /// <summary>
     /// Does the initial loading of our local LLM.
@@ -88,5 +92,19 @@ public class BonsaiClient
         Result = result;
 
         return result.Content;
+    }
+    /// <summary>
+    /// Counts the exact number of tokens in the given text using the model's tokenizer.
+    /// </summary>
+    /// <param name="text"> Text content </param>
+    /// <param name="ct"> Cancellation token </param>
+    /// <returns> Token count </returns>
+    /// <exception cref="InvalidOperationException"> Error when LLM is not loaded </exception>
+    public async Task<int> CountTokensAsync(string text, CancellationToken ct = default)
+    {
+        if (!IsModelLoaded)
+            throw new InvalidOperationException("Selected LLM is not loaded.");
+
+        return await _generatorModel.CountTokensAsync(text, ct);
     }
 }
