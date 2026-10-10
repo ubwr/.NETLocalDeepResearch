@@ -80,7 +80,7 @@
     <value>{0} tokens</value>
   </data>
   <data name="StatusGathering" xml:space="preserve">
-    <value>Reading sources: {0} of {1} pages, {2} passages kept</value>
+    <value>Reading sources: {0} of {1} pages, {2} relevant passages</value>
   </data>
   <data name="StatusSelected" xml:space="preserve">
     <value>Selected {0} of {1} passages</value>
