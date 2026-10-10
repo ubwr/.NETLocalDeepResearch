@@ -20,10 +20,6 @@ public partial class Home
     /// Minimum number of unique sites required for a search query to be valid.
     /// </summary>
     private const int MinSites = 2;
-    /// <summary>
-    /// Additional padding for the input context to account for original prompt, system message, etc.
-    /// </summary>
-    private const int PromptReserve = 200;
 
     [Inject] private BonsaiClient Bonsai { get; set; }
     [Inject] private SearxngClient Searxng { get; set; }
@@ -79,9 +75,9 @@ public partial class Home
     /// </summary>
     private IReadOnlyList<ScoredPassage> _selected = [];
     /// <summary>
-    /// Maximum number of tokens we can use as context for a prompt.
+    /// Maximum number of tokens our passages can use as context.
     /// </summary>
-    private int PromptBudget => Bonsai.PromptBudget - PromptReserve;
+    private int _passageTokenBudget;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -146,6 +142,10 @@ public partial class Home
         {
             string query = _prompt.Trim();
 
+            // Get our token count before adding any passages
+            int fixedTokens = await Bonsai.CountPromptTokensAsync(PromptHelper.SystemMessage, PromptHelper.Question(query));
+            _passageTokenBudget = Bonsai.PromptTokenBudget - fixedTokens;
+
             _results = await Searxng.SearchAsync(query);
             StateHasChanged();
 
@@ -176,7 +176,7 @@ public partial class Home
                 return;
             }
 
-            _selected = ContextBuilder.Select(relevantPassages, PromptBudget);
+            _selected = ContextBuilder.Select(relevantPassages, _passageTokenBudget);
             _runStatus = string.Format(Strings.StatusSelected, _selected.Count, relevantPassages.Count);
             StateHasChanged();
 
@@ -208,7 +208,7 @@ public partial class Home
         for (int start = 0; start < candidates.Count; start += BatchSize)
         {
             // Stop fetching pages if we've already hit our requirements
-            if (fetchedPageCount >= MinPages && relevantPassageTokens >= PromptBudget)
+            if (fetchedPageCount >= MinPages && relevantPassageTokens >= _passageTokenBudget)
                 break;
 
             List<SearchResult> batch = candidates.Skip(start).Take(BatchSize).ToList();

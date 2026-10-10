@@ -89,7 +89,7 @@
         int siteCount = ContextBuilder.CountSites(_selected);
 
         <MudPaper Class="pa-4" Elevation="0" Outlined>
-            <MudText Typo="Typo.overline">@($"Debug: {_selected.Count} passages, {selectedTokens} / {PromptBudget} tokens, {siteCount} sites")</MudText>
+            <MudText Typo="Typo.overline">@($"Debug: {_selected.Count} passages, {selectedTokens} / {_passageTokenBudget} tokens, {siteCount} sites")</MudText>
 
             <MudStack Spacing="2" Class="mt-2">
                 @foreach (ScoredPassage selected in _selected)

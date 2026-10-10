@@ -39,7 +39,16 @@ public static class PromptHelper
         foreach (ScoredPassage passage in passages)
             builder.Append(Document(passage.Passage.Text));
 
-        builder.Append($"Question: {question}");
+        builder.Append(Question(question));
         return builder.ToString();
+    }
+    /// <summary>
+    /// Prepends question prompt with a label. This function is used so we can get a more accurate token count.
+    /// </summary>
+    /// <param name="question"> Question in prompt </param>
+    /// <returns> Prompt question with a label </returns>
+    public static string Question(string question)
+    {
+        return $"Question: {question}";
     }
 }

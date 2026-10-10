@@ -34,7 +34,7 @@ public class BonsaiClient
     /// <summary>
     /// Maximum number of tokens we can use as context for a prompt.
     /// </summary>
-    public int PromptBudget => (_generatorModel?.MaxContextLength ?? 0) - _options.MaxOutputTokens;
+    public int PromptTokenBudget => (_generatorModel?.MaxContextLength ?? 0) - _options.MaxOutputTokens;
 
     /// <summary>
     /// Does the initial loading of our local LLM.
@@ -71,9 +71,7 @@ public class BonsaiClient
     /// Sends a request to our local LLM with a given prompt.
     /// </summary>
     /// <param name="systemMessage"> System message for our local LLM </param>
-    /// <param name="userMessage">
-    /// User prompt for our local LLM. Contains list of <see cref="ScoredPassage"/> and the question to answer.
-    /// </param>
+    /// <param name="userMessage"> Full user prompt for our local LLM </param>
     /// <param name="ct"> Cancellation token </param>
     /// <returns> Response from model </returns>
     /// <exception cref="InvalidOperationException"> Error when LLM is not loaded </exception>
@@ -83,21 +81,58 @@ public class BonsaiClient
             throw new InvalidOperationException("Selected LLM is not loaded.");
 
         var result = await _generatorModel.GenerateChatCompleteResultAsync(
-            [
-                new ChatMessage { Role = ChatRole.System, Content = systemMessage },
-                new ChatMessage { Role = ChatRole.User, Content = userMessage }
-            ],
-            new GenerationOptions
-            {
-                MaxTokens = _options.MaxOutputTokens,
-                Temperature = (float)_options.Temperature,
-                FilterReasoningTokens = true
-            },
+            CreateMessages(systemMessage, userMessage),
+            CreateGenerationOptions(),
             ct);
 
         Result = result;
 
         return result.Content;
+    }
+    /// <summary>
+    /// Counts total tokens from a prompt and its generation options.
+    /// </summary>
+    /// <param name="systemMessage"> System message for our local LLM </param>
+    /// <param name="userMessage"> Full user prompt for our local LLM </param>
+    /// <param name="ct"> Cancellation token </param>
+    /// <returns> Token count </returns>
+    /// <exception cref="InvalidOperationException"> Error when LLM is not loaded </exception>
+    public async Task<int> CountPromptTokensAsync(string systemMessage, string userMessage, CancellationToken ct = default)
+    {
+        if (!IsModelLoaded)
+            throw new InvalidOperationException("Selected LLM is not loaded.");
+
+        return await _generatorModel.CountTokensAsync(
+            CreateMessages(systemMessage, userMessage),
+            CreateGenerationOptions(),
+            ct);
+    }
+    /// <summary>
+    /// Creates total prompt for our local LLM.
+    /// </summary>
+    /// <param name="systemMessage"> System message for our local LLM </param>
+    /// <param name="userMessage"> Full user prompt for our local LLM </param>
+    /// <returns> List of messages </returns>
+    private static List<ChatMessage> CreateMessages(string systemMessage, string userMessage)
+    {
+        return
+        [
+            new ChatMessage { Role = ChatRole.System, Content = systemMessage },
+            new ChatMessage { Role = ChatRole.User, Content = userMessage }
+        ];
+    }
+    /// <summary>
+    /// Creates a <see cref="GenerationOptions"/> object with our custom configuration.
+    /// </summary>
+    /// <returns> Generation configuration </returns>
+    private GenerationOptions CreateGenerationOptions()
+    {
+        return new GenerationOptions
+        {
+            MaxTokens = _options.MaxOutputTokens,
+            Temperature = (float)_options.Temperature,
+            FilterReasoningTokens = true
+        };
     }
     /// <summary>
     /// Counts the exact number of tokens in the given text using the model's tokenizer.
