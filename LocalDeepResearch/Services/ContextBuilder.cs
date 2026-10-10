@@ -19,17 +19,17 @@ public static class ContextBuilder
     public static IReadOnlyList<ScoredPassage> Select(IReadOnlyList<ScoredPassage> passages, int budget)
     {
         // Token limit per source
-        var sourceLimit = (int)(budget * SourceShare);
-        var ordered = passages.OrderByDescending(passage => passage.Score).ToList();
+        int sourceLimit = (int)(budget * SourceShare);
+        List<ScoredPassage> ordered = passages.OrderByDescending(passage => passage.Score).ToList();
 
-        var selectedPassages = new List<ScoredPassage>();
-        var skippedPassages = new List<ScoredPassage>();
-        var sourceTokens = new Dictionary<string, int>();
-        var usedTokens = 0;
+        List<ScoredPassage> selectedPassages = new();
+        List<ScoredPassage> skippedPassages = new();
+        Dictionary<string, int> sourceTokens = new();
+        int usedTokens = 0;
 
-        foreach (var passage in ordered)
+        foreach (ScoredPassage passage in ordered)
         {
-            sourceTokens.TryGetValue(passage.Passage.Host, out var sourceTokenCount);
+            sourceTokens.TryGetValue(passage.Passage.Host, out int sourceTokenCount);
 
             // Prevent token count from going over budget and prevent sources from going over their token limit
             if (usedTokens + passage.Tokens > budget || sourceTokenCount + passage.Tokens > sourceLimit)
@@ -44,7 +44,7 @@ public static class ContextBuilder
         }
 
         // Fill any unused context space with previously skipped passages, even if it goes over source limit
-        foreach (var passage in skippedPassages)
+        foreach (ScoredPassage passage in skippedPassages)
         {
             if (usedTokens + passage.Tokens > budget)
                 continue;

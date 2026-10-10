@@ -31,7 +31,7 @@ public class SearxngClient
     public async Task<IReadOnlyList<SearchResult>> SearchAsync(string query, CancellationToken ct = default)
     {
         // SearXNG expects a query string instead of a json request body
-        var url = QueryHelpers.AddQueryString("/search", new Dictionary<string, string?>
+        string url = QueryHelpers.AddQueryString("/search", new Dictionary<string, string?>
         {
             ["q"] = query,
             ["format"] = "json",
@@ -39,7 +39,7 @@ public class SearxngClient
             ["language"] = _options.Language
         });
 
-        var response = await _http.GetFromJsonAsync<SearchResponse>(url, Json, ct);
+        SearchResponse? response = await _http.GetFromJsonAsync<SearchResponse>(url, Json, ct);
 
         return response?.Results
             .Where(result => !string.IsNullOrWhiteSpace(result.Url))

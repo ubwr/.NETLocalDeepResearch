@@ -23,7 +23,7 @@ builder.Services.Configure<SearxngOptions>(builder.Configuration.GetSection("Sea
 
 builder.Services.AddHttpClient<SearxngClient>((serviceProvider, client) =>
 {
-    var options = serviceProvider.GetRequiredService<IOptions<SearxngOptions>>().Value;
+    SearxngOptions options = serviceProvider.GetRequiredService<IOptions<SearxngOptions>>().Value;
     client.BaseAddress = new Uri(options.Url);
     client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
 });

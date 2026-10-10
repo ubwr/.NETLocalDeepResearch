@@ -34,7 +34,7 @@ public class BonsaiClient
     /// <summary>
     /// Maximum number of tokens we can use as context for a prompt.
     /// </summary>
-    public int PromptBudget => (_generatorModel?.MaxContextLength ?? 0) - _options.MaxTokens;
+    public int PromptBudget => (_generatorModel?.MaxContextLength ?? 0) - _options.MaxOutputTokens;
 
     /// <summary>
     /// Does the initial loading of our local LLM.
@@ -83,7 +83,7 @@ public class BonsaiClient
             [new ChatMessage { Role = ChatRole.User, Content = prompt }],
             new GenerationOptions
             {
-                MaxTokens = _options.MaxTokens,
+                MaxTokens = _options.MaxOutputTokens,
                 Temperature = (float)_options.Temperature,
                 FilterReasoningTokens = true
             },

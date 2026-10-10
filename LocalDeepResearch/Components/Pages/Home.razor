@@ -62,8 +62,8 @@
             @if (Bonsai.Result.HasValue)
             {
                 var result = Bonsai.Result.Value;
-                var tokensPerSecond = result.Timings?.CompletionTokensPerSecond ?? 0;
-                var duration = result.Timings?.CompletionDuration ?? TimeSpan.Zero;
+                double tokensPerSecond = result.Timings?.CompletionTokensPerSecond ?? 0;
+                TimeSpan duration = result.Timings?.CompletionDuration ?? TimeSpan.Zero;
 
                 <MudStack Row Spacing="3" Class="mt-4">
                     <MudText Typo="Typo.caption">@($"{tokensPerSecond:F1} tok/s")</MudText>
@@ -76,16 +76,16 @@
 
     @if (_selected.Count > 0)
     {
-        var selectedTokens = _selected.Sum(passage => passage.Tokens);
-        var sourceCount = ContextBuilder.CountSources(_selected);
+        int selectedTokens = _selected.Sum(passage => passage.Tokens);
+        int sourceCount = ContextBuilder.CountSources(_selected);
 
         <MudPaper Class="pa-4" Elevation="0" Outlined>
             <MudText Typo="Typo.overline">@($"Debug: {_selected.Count} passages, {selectedTokens} / {PromptBudget} tokens, {sourceCount} sources")</MudText>
 
             <MudStack Spacing="2" Class="mt-2">
-                @foreach (var selected in _selected)
+                @foreach (ScoredPassage selected in _selected)
                 {
-                    var preview = selected.Passage.Text.Length > 200 ? selected.Passage.Text[..200] + "…" : selected.Passage.Text;
+                    string preview = selected.Passage.Text.Length > 200 ? selected.Passage.Text[..200] + "…" : selected.Passage.Text;
 
                     <MudPaper Class="pa-3" Elevation="0" Outlined>
                         <MudText Typo="Typo.caption">@($"{selected.Score:P1} | {selected.Passage.Host} | {selected.Tokens} tokens")</MudText>
@@ -101,13 +101,13 @@
         <MudPaper Class="pa-4" Elevation="0" Outlined>
             <MudText Typo="Typo.overline">@_keptCount / @_results.Count</MudText>
             <MudStack Spacing="1">
-                @for (var i = 0; i < _results.Count; i++)
+                @for (int i = 0; i < _results.Count; i++)
                 {
                     if (_scores[i] < Reranker.Threshold)
                         continue;
 
-                    var result = _results[i];
-                    var score = _scores[i];
+                    SearchResult result = _results[i];
+                    float score = _scores[i];
 
                     <MudStack Row Spacing="2">
                         <MudLink Href="@result.Url" Target="_blank" rel="noopener noreferrer" Typo="Typo.body2">@result.Title</MudLink>

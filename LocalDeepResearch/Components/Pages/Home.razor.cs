@@ -144,7 +144,7 @@ public partial class Home
 
         try
         {
-            var query = _prompt.Trim();
+            string query = _prompt.Trim();
 
             _results = await Searxng.SearchAsync(query);
             StateHasChanged();
@@ -154,7 +154,7 @@ public partial class Home
             // Score and filter our search results
             if (_results.Count > 0)
             {
-                var documents = _results.Select(r => $"{r.Title} {r.Content}").ToList();
+                List<string> documents = _results.Select(r => $"{r.Title} {r.Content}").ToList();
                 _scores = await Reranker.ScoreAsync(query, documents);
 
                 // Get relevant sources via filtering with index
@@ -168,7 +168,7 @@ public partial class Home
                 StateHasChanged();
             }
 
-            var relevantPassages = await GatherPassagesAsync(query, relevantResults);
+            List<ScoredPassage> relevantPassages = await GatherPassagesAsync(query, relevantResults);
 
             if (ContextBuilder.CountSources(relevantPassages) < MinSources)
             {
@@ -199,29 +199,29 @@ public partial class Home
     /// <returns> List of relevant text passages </returns>
     private async Task<List<ScoredPassage>> GatherPassagesAsync(string query, IReadOnlyList<SearchResult> candidates)
     {
-        var relevantSources = new List<ScoredPassage>();
-        var seenTexts = new HashSet<string>();
-        var relevantSourceTokens = 0;
-        var fetchedPageCount = 0;
+        List<ScoredPassage> relevantSources = new();
+        HashSet<string> seenTexts = new();
+        int relevantSourceTokens = 0;
+        int fetchedPageCount = 0;
 
-        for (var start = 0; start < candidates.Count; start += BatchSize)
+        for (int start = 0; start < candidates.Count; start += BatchSize)
         {
             // Stop fetching pages if we've already hit our requirements
             if (fetchedPageCount >= MinPages && relevantSourceTokens >= PromptBudget)
                 break;
 
-            var batch = candidates.Skip(start).Take(BatchSize).ToList();
-            var fetchTasks = new List<Task<IReadOnlyList<Passage>>>();
+            List<SearchResult> batch = candidates.Skip(start).Take(BatchSize).ToList();
+            List<Task<IReadOnlyList<Passage>>> fetchTasks = new();
 
-            foreach (var result in batch)
+            foreach (SearchResult result in batch)
                 fetchTasks.Add(FetchPassagesAsync(result));
             
-            var pages = await Task.WhenAll(fetchTasks);            
+            IReadOnlyList<Passage>[] pages = await Task.WhenAll(fetchTasks);            
             fetchedPageCount += batch.Count;
-            var passages = new List<Passage>();
+            List<Passage> passages = new();
 
             // Flatten our list of passages and ignore duplicate passages
-            foreach (var passage in pages.SelectMany(page => page))
+            foreach (Passage passage in pages.SelectMany(page => page))
             {
                 if (seenTexts.Contains(passage.Text))
                     continue;
@@ -234,14 +234,14 @@ public partial class Home
             if (passages.Count > 0)
             {
                 // Score passages for relevance
-                var scores = await Reranker.ScoreAsync(query, passages.Select(passage => passage.Text));
+                float[] scores = await Reranker.ScoreAsync(query, passages.Select(passage => passage.Text));
 
-                for (var i = 0; i < passages.Count; i++)
+                for (int i = 0; i < passages.Count; i++)
                 {
                     if (scores[i] < Reranker.Threshold)
                         continue;
 
-                    var tokens = await Bonsai.CountTokensAsync(passages[i].Text);
+                    int tokens = await Bonsai.CountTokensAsync(passages[i].Text);
                     relevantSources.Add(new ScoredPassage(passages[i], scores[i], tokens));
                     relevantSourceTokens += tokens;
                 }
@@ -262,7 +262,7 @@ public partial class Home
     {
         try
         {
-            var html = await Pages.ExtractAsync(result.Url);
+            string html = await Pages.ExtractAsync(result.Url);
             return Chunker.Chunk(html, result.Title, result.Url);
         }
         catch (HttpRequestException)

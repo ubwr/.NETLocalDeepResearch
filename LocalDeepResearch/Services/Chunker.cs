@@ -34,7 +34,7 @@ public static class Chunker
     {
         var document = new HtmlParser().ParseDocument(html);
 
-        var passages = new List<Passage>();
+        List<Passage> passages = new();
         var buffer = new StringBuilder();
 
         foreach (var element in document.QuerySelectorAll("h1, h2, h3, h4, h5, h6, p, li"))
@@ -43,7 +43,7 @@ public static class Chunker
             if (element.LocalName == "p" && element.Closest("li") is not null)
                 continue;
 
-            var text = Normalize(TextWithoutNestedLists(element));
+            string text = Normalize(TextWithoutNestedLists(element));
 
             if (text.Length == 0)
                 continue;
@@ -59,7 +59,7 @@ public static class Chunker
             }
             
             // If this text alone is over the char limit, break it up by sentence and add those instead
-            foreach (var sentence in SentenceEnd.Split(text))
+            foreach (string sentence in SentenceEnd.Split(text))
             {
                 if (sentence.Length <= MaxChars)
                     Add(sentence);
