@@ -180,7 +180,8 @@ public partial class Home
             _runStatus = string.Format(Strings.StatusSelected, _selected.Count, relevantPassages.Count);
             StateHasChanged();
 
-            _answer = await Bonsai.AskAsync(query);
+            string userMessage = PromptHelper.UserMessage(_selected, query);
+            _answer = await Bonsai.AskAsync(PromptHelper.SystemMessage, userMessage);
         }
         catch (Exception ex)
         {
@@ -241,7 +242,7 @@ public partial class Home
                     if (scores[i] < Reranker.Threshold)
                         continue;
 
-                    int tokens = await Bonsai.CountTokensAsync(passages[i].Text);
+                    int tokens = await Bonsai.CountTokensAsync(PromptHelper.Document(passages[i].Text));
                     relevantSources.Add(new ScoredPassage(passages[i], scores[i], tokens));
                     relevantSourceTokens += tokens;
                 }

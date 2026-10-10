@@ -70,17 +70,23 @@ public class BonsaiClient
     /// <summary>
     /// Sends a request to our local LLM with a given prompt.
     /// </summary>
-    /// <param name="prompt"> Prompt for our local LLM </param>
+    /// <param name="systemMessage"> System message for our local LLM </param>
+    /// <param name="userMessage">
+    /// User prompt for our local LLM. Contains list of <see cref="ScoredPassage"/> and the question to answer.
+    /// </param>
     /// <param name="ct"> Cancellation token </param>
     /// <returns> Response from model </returns>
     /// <exception cref="InvalidOperationException"> Error when LLM is not loaded </exception>
-    public async Task<string> AskAsync(string prompt, CancellationToken ct = default)
+    public async Task<string> AskAsync(string systemMessage, string userMessage, CancellationToken ct = default)
     {
         if (!IsModelLoaded)
             throw new InvalidOperationException("Selected LLM is not loaded.");
 
         var result = await _generatorModel.GenerateChatCompleteResultAsync(
-            [new ChatMessage { Role = ChatRole.User, Content = prompt }],
+            [
+                new ChatMessage { Role = ChatRole.System, Content = systemMessage },
+                new ChatMessage { Role = ChatRole.User, Content = userMessage }
+            ],
             new GenerationOptions
             {
                 MaxTokens = _options.MaxOutputTokens,
