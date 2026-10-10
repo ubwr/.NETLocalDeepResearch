@@ -28,6 +28,12 @@ builder.Services.AddHttpClient<SearxngClient>((serviceProvider, client) =>
     client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
 });
 
+builder.Services.AddHttpClient<PageClient>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(15);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("LocalDeepResearch/0.1 (+https://github.com/ubwr/.NETLocalDeepResearch)");
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
