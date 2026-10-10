@@ -15,11 +15,11 @@ public class PageClient
     }
 
     /// <summary>
-    /// Extracts text content from a URL.
+    /// Extracts page content from a URL.
     /// </summary>
-    /// <param name="url"> URL that we are extracting text content from </param>
+    /// <param name="url"> URL that we are extracting page content from </param>
     /// <param name="ct"> Cancellation token </param>
-    /// <returns> Text content from a webpage </returns>
+    /// <returns> Page content as a single string </returns>
     /// <exception cref="HttpRequestException"> Error from webpage </exception>
     /// <exception cref="InvalidOperationException"> Error getting content from this page </exception>
     /// <exception cref="TaskCanceledException"> Request was cancelled </exception>

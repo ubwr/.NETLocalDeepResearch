@@ -85,7 +85,10 @@
   <data name="StatusSelected" xml:space="preserve">
     <value>Selected {0} of {1} passages</value>
   </data>
-  <data name="NotEnoughSources" xml:space="preserve">
-    <value>Not enough relevant sources were found to answer this question.</value>
+  <data name="NotEnoughSites" xml:space="preserve">
+    <value>Not enough relevant sites were found to answer this question.</value>
+  </data>
+  <data name="Sources" xml:space="preserve">
+    <value>Sources</value>
   </data>
 </root>

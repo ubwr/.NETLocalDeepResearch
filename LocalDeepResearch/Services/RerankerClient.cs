@@ -22,7 +22,7 @@ public class RerankerClient
     /// </summary>
     public bool IsModelLoaded => _rerankerModel is not null;
     /// <summary>
-    /// Threshold that we compare source scores to for filtering.
+    /// Threshold that we compare document scores to for filtering.
     /// </summary>
     public double Threshold => _options.Threshold;
 
@@ -42,13 +42,13 @@ public class RerankerClient
             cancellationToken: ct);
     }
     /// <summary>
-    /// Scores a set of sources by their relevance to a search query.
+    /// Scores a set of documents by their relevance to a search query.
     /// Scores will be between 0 and 1.
     /// </summary>
     /// <param name="query"> Search query </param>
-    /// <param name="documents"> Search results </param>
+    /// <param name="documents"> Documents to score </param>
     /// <param name="ct"> Cancellation token </param>
-    /// <returns> Array of scores for a set of sources </returns>
+    /// <returns> Array of scores for a set of documents </returns>
     /// <exception cref="InvalidOperationException"> Error when reranker is not loaded </exception>
     public async Task<float[]> ScoreAsync(
         string query,

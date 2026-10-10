@@ -6,9 +6,9 @@ namespace LocalDeepResearch.Services;
 public static class ContextBuilder
 {
     /// <summary>
-    /// How much of the context budget a single source can use (%).
+    /// How much of the context budget a single site can use (%).
     /// </summary>
-    private const double SourceShare = 0.25;
+    private const double SiteShare = 0.25;
     
     /// <summary>
     /// Returns highest rated text passages and ensures we stay below our context token budget.
@@ -18,21 +18,21 @@ public static class ContextBuilder
     /// <returns> Final list of relevant text passages </returns>
     public static IReadOnlyList<ScoredPassage> Select(IReadOnlyList<ScoredPassage> passages, int budget)
     {
-        // Token limit per source
-        int sourceLimit = (int)(budget * SourceShare);
+        // Token limit per site
+        int siteLimit = (int)(budget * SiteShare);
         List<ScoredPassage> ordered = passages.OrderByDescending(passage => passage.Score).ToList();
 
         List<ScoredPassage> selectedPassages = new();
         List<ScoredPassage> skippedPassages = new();
-        Dictionary<string, int> sourceTokens = new();
+        Dictionary<string, int> siteTokens = new();
         int usedTokens = 0;
 
         foreach (ScoredPassage passage in ordered)
         {
-            sourceTokens.TryGetValue(passage.Passage.Host, out int sourceTokenCount);
+            siteTokens.TryGetValue(passage.Passage.Host, out int siteTokenCount);
 
-            // Prevent token count from going over budget and prevent sources from going over their token limit
-            if (usedTokens + passage.Tokens > budget || sourceTokenCount + passage.Tokens > sourceLimit)
+            // Prevent token count from going over budget and prevent sites from going over their token limit
+            if (usedTokens + passage.Tokens > budget || siteTokenCount + passage.Tokens > siteLimit)
             {
                 skippedPassages.Add(passage);
                 continue;
@@ -40,10 +40,10 @@ public static class ContextBuilder
 
             selectedPassages.Add(passage);
             usedTokens += passage.Tokens;
-            sourceTokens[passage.Passage.Host] = sourceTokenCount + passage.Tokens;
+            siteTokens[passage.Passage.Host] = siteTokenCount + passage.Tokens;
         }
 
-        // Fill any unused context space with previously skipped passages, even if it goes over source limit
+        // Fill any unused context space with previously skipped passages, even if it goes over site limit
         foreach (ScoredPassage passage in skippedPassages)
         {
             if (usedTokens + passage.Tokens > budget)
@@ -56,13 +56,26 @@ public static class ContextBuilder
         return selectedPassages;
     }
     /// <summary>
-    /// Counts how many unique sources there are in a list of passages.
+    /// Counts how many unique sites there are in a list of passages.
     /// </summary>
     /// <param name="passages"> Collection of scored passages </param>
-    /// <returns> Number of unique sources </returns>
-    public static int CountSources(IEnumerable<ScoredPassage> passages)
+    /// <returns> Number of unique sites </returns>
+    public static int CountSites(IEnumerable<ScoredPassage> passages)
     {
         return passages.Select(passage => passage.Passage.Host).Distinct().Count();
+    }
+    /// <summary>
+    /// Gets the list of sources used to answer a prompt.
+    /// </summary>
+    /// <param name="passages"> Passages used to answer a prompt </param>
+    /// <returns> List of distinct sources </returns>
+    public static IReadOnlyList<Source> Sources(IEnumerable<ScoredPassage> passages)
+    {
+        return passages
+            .OrderByDescending(passage => passage.Score)
+            .Select(passage => new Source(passage.Passage.Title, passage.Passage.Url))
+            .DistinctBy(source => source.Url)
+            .ToList();
     }
 }
 
@@ -73,3 +86,9 @@ public static class ContextBuilder
 /// <param name="Score"> Passage score </param>
 /// <param name="Tokens"> Total token count for this passage </param>
 public record ScoredPassage(Passage Passage, float Score, int Tokens);
+/// <summary>
+/// A single source used to answer a prompt.
+/// </summary>
+/// <param name="Title"> Page title </param>
+/// <param name="Url"> Page URL </param>
+public record Source(string Title, string Url);

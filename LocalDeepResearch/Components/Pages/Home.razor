@@ -60,6 +60,14 @@
         <MudPaper Class="pa-4" Elevation="0" Outlined>
             <MudText Typo="Typo.body1" Style="white-space: pre-wrap;">@_answer</MudText>
 
+            <MudStack Spacing="1" AlignItems="AlignItems.Start" Class="mt-4">
+                <MudText Typo="Typo.subtitle2">@Strings.Sources</MudText>
+                @foreach (Source source in ContextBuilder.Sources(_selected))
+                {
+                    <MudLink Href="@source.Url" Target="_blank" rel="noopener noreferrer" Typo="Typo.body2">@source.Title</MudLink>
+                }
+            </MudStack>
+
             @if (Bonsai.Result.HasValue)
             {
                 var result = Bonsai.Result.Value;
@@ -78,10 +86,10 @@
     @if (_selected.Count > 0)
     {
         int selectedTokens = _selected.Sum(passage => passage.Tokens);
-        int sourceCount = ContextBuilder.CountSources(_selected);
+        int siteCount = ContextBuilder.CountSites(_selected);
 
         <MudPaper Class="pa-4" Elevation="0" Outlined>
-            <MudText Typo="Typo.overline">@($"Debug: {_selected.Count} passages, {selectedTokens} / {PromptBudget} tokens, {sourceCount} sources")</MudText>
+            <MudText Typo="Typo.overline">@($"Debug: {_selected.Count} passages, {selectedTokens} / {PromptBudget} tokens, {siteCount} sites")</MudText>
 
             <MudStack Spacing="2" Class="mt-2">
                 @foreach (ScoredPassage selected in _selected)

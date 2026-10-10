@@ -98,9 +98,15 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
-        internal static string NotEnoughSources {
+        internal static string NotEnoughSites {
             get {
-                return ResourceManager.GetString("NotEnoughSources", resourceCulture);
+                return ResourceManager.GetString("NotEnoughSites", resourceCulture);
+            }
+        }
+
+        internal static string Sources {
+            get {
+                return ResourceManager.GetString("Sources", resourceCulture);
             }
         }
     }

@@ -17,9 +17,9 @@ public partial class Home
     /// </summary>
     private const int MinPages = 10;
     /// <summary>
-    /// Minimum number of unique sources required for a search query to be valid.
+    /// Minimum number of unique sites required for a search query to be valid.
     /// </summary>
-    private const int MinSources = 2;
+    private const int MinSites = 2;
     /// <summary>
     /// Additional padding for the input context to account for original prompt, system message, etc.
     /// </summary>
@@ -170,9 +170,9 @@ public partial class Home
 
             List<ScoredPassage> relevantPassages = await GatherPassagesAsync(query, relevantResults);
 
-            if (ContextBuilder.CountSources(relevantPassages) < MinSources)
+            if (ContextBuilder.CountSites(relevantPassages) < MinSites)
             {
-                _error = Strings.NotEnoughSources;
+                _error = Strings.NotEnoughSites;
                 return;
             }
 
@@ -200,15 +200,15 @@ public partial class Home
     /// <returns> List of relevant text passages </returns>
     private async Task<List<ScoredPassage>> GatherPassagesAsync(string query, IReadOnlyList<SearchResult> candidates)
     {
-        List<ScoredPassage> relevantSources = new();
+        List<ScoredPassage> relevantPassages = new();
         HashSet<string> seenTexts = new();
-        int relevantSourceTokens = 0;
+        int relevantPassageTokens = 0;
         int fetchedPageCount = 0;
 
         for (int start = 0; start < candidates.Count; start += BatchSize)
         {
             // Stop fetching pages if we've already hit our requirements
-            if (fetchedPageCount >= MinPages && relevantSourceTokens >= PromptBudget)
+            if (fetchedPageCount >= MinPages && relevantPassageTokens >= PromptBudget)
                 break;
 
             List<SearchResult> batch = candidates.Skip(start).Take(BatchSize).ToList();
@@ -243,16 +243,16 @@ public partial class Home
                         continue;
 
                     int tokens = await Bonsai.CountTokensAsync(PromptHelper.Document(passages[i].Text));
-                    relevantSources.Add(new ScoredPassage(passages[i], scores[i], tokens));
-                    relevantSourceTokens += tokens;
+                    relevantPassages.Add(new ScoredPassage(passages[i], scores[i], tokens));
+                    relevantPassageTokens += tokens;
                 }
             }
 
-            _runStatus = string.Format(Strings.StatusGathering, fetchedPageCount, candidates.Count, relevantSources.Count);
+            _runStatus = string.Format(Strings.StatusGathering, fetchedPageCount, candidates.Count, relevantPassages.Count);
             StateHasChanged();
         }
 
-        return relevantSources;
+        return relevantPassages;
     }
     /// <summary>
     /// Gets a list of text passages from a single search result.
