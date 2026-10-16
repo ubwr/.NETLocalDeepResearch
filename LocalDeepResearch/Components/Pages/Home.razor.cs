@@ -78,21 +78,22 @@ public partial class Home
     /// </summary>
     private string? _runStatus;
     /// <summary>
-    /// Text passages that are relevant to the original prompt and fit within the token budget.
-    /// </summary>
-    private IReadOnlyList<ScoredPassage> _selected = [];
-    /// <summary>
-    /// Maximum number of tokens our passages can use as context.
-    /// </summary>
-    private int _passageTokenBudget;
-    /// <summary>
     /// The full set of subquestions to prompt our LLM.
     /// </summary>
     private ResearchPlan? _plan;
     /// <summary>
+    /// Minimum relevance score (0 to 1) a search result needs for its page to get fetched.
+    /// </summary>
+    private double _pageThreshold;
+    /// <summary>
     /// Summary of our research report.
     /// </summary>
     private string? _summary;
+
+    protected override void OnInitialized()
+    {
+        _pageThreshold = Reranker.PageThreshold;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -151,7 +152,6 @@ public partial class Home
         _scores = [];
         _keptCount = 0;
         _runStatus = null;
-        _selected = [];
         _plan = null;
         _summary = null;
 
@@ -215,7 +215,7 @@ public partial class Home
 
         // Get our token count before adding any passages
         int fixedTokens = await Chat.CountPromptTokensAsync(PromptHelper.SystemMessage, PromptHelper.SectionRequest(question, otherHeadings));
-        _passageTokenBudget = Chat.PromptTokenBudget - fixedTokens;
+        int passageTokenBudget = Chat.PromptTokenBudget - fixedTokens;
 
         _results = await Searxng.SearchAsync(question);
         StateHasChanged();
@@ -230,7 +230,7 @@ public partial class Home
 
             // Get relevant sources via filtering with index
             relevantResults = Enumerable.Range(0, _results.Count)
-                .Where(i => _scores[i] >= Reranker.PageThreshold)
+                .Where(i => _scores[i] >= _pageThreshold)
                 .OrderByDescending(i => _scores[i])
                 .Select(i => _results[i])
                 .ToList();
@@ -239,27 +239,28 @@ public partial class Home
             StateHasChanged();
         }
 
-        List<ScoredPassage> relevantPassages = await GatherPassagesAsync(question, relevantResults);
+        List<ScoredPassage> relevantPassages = await GatherPassagesAsync(question, relevantResults, passageTokenBudget);
 
         if (ContextBuilder.CountSites(relevantPassages) < MinSites)
             return null;
 
-        _selected = ContextBuilder.Select(relevantPassages, _passageTokenBudget);
-        _runStatus = string.Format(Strings.StatusSelected, _selected.Count, relevantPassages.Count);
+        IReadOnlyList<ScoredPassage> selected = ContextBuilder.Select(relevantPassages, passageTokenBudget);
+        _runStatus = string.Format(Strings.StatusSelected, selected.Count, relevantPassages.Count);
         StateHasChanged();
 
-        string userMessage = PromptHelper.UserMessage(_selected, question, otherHeadings);
+        string userMessage = PromptHelper.UserMessage(selected, question, otherHeadings);
         string text = await Chat.AskAsync(PromptHelper.SystemMessage, userMessage);
 
-        return new Section(subQuestion.Heading, text, ContextBuilder.Sources(_selected));
+        return new Section(subQuestion.Heading, text, ContextBuilder.Sources(selected));
     }
     /// <summary>
     /// Gets text passages from a list of relevant search results.
     /// </summary>
     /// <param name="query"> Search query </param>
     /// <param name="candidates"> Relevant search results </param>
+    /// <param name="passageTokenBudget"> Maximum number of tokens our passages can use as context </param>
     /// <returns> List of relevant text passages </returns>
-    private async Task<List<ScoredPassage>> GatherPassagesAsync(string query, IReadOnlyList<SearchResult> candidates)
+    private async Task<List<ScoredPassage>> GatherPassagesAsync(string query, IReadOnlyList<SearchResult> candidates, int passageTokenBudget)
     {
         List<ScoredPassage> relevantPassages = new();
         HashSet<string> seenTexts = new();
@@ -269,7 +270,7 @@ public partial class Home
         for (int start = 0; start < candidates.Count; start += BatchSize)
         {
             // Stop fetching pages if we've already hit our requirements
-            if (fetchedPageCount >= MinPages && relevantPassageTokens >= _passageTokenBudget)
+            if (fetchedPageCount >= MinPages && relevantPassageTokens >= passageTokenBudget)
                 break;
 
             List<SearchResult> batch = candidates.Skip(start).Take(BatchSize).ToList();

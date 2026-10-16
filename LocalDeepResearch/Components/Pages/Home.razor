@@ -17,6 +17,14 @@
                   OnKeyDown="OnKeyDown"
                   FullWidth />
 
+    <MudSlider T="double"
+               @bind-Value="_pageThreshold"
+               Min="0"
+               Max="0.9"
+               Step="0.1"
+               ValueLabel
+               Disabled="_busy || _loadingModel">@string.Format(Strings.PageThreshold, _pageThreshold)</MudSlider>
+
     @if (_loadingModel)
     {
         <MudStack Spacing="1">
@@ -54,26 +62,6 @@
     @if (_error is not null)
     {
         <MudAlert Severity="Severity.Error">@_error</MudAlert>
-    }
-
-    @if (_plan is not null)
-    {
-        List<SubQuestion> plannedQuestions = new() { _plan.History };
-        plannedQuestions.AddRange(_plan.SubQuestions);
-
-        <MudPaper Class="pa-4" Elevation="0" Outlined>
-            <MudText Typo="Typo.overline">Debug: plan</MudText>
-            <MudText Typo="Typo.subtitle1">@_plan.Title</MudText>
-            <MudStack Spacing="2" Class="mt-2">
-                @foreach (SubQuestion subQuestion in plannedQuestions)
-                {
-                    <div>
-                        <MudText Typo="Typo.subtitle2">@subQuestion.Heading</MudText>
-                        <MudText Typo="Typo.body2">@subQuestion.Question</MudText>
-                    </div>
-                }
-            </MudStack>
-        </MudPaper>
     }
 
     @if (_sections.Count > 0)
@@ -114,28 +102,6 @@
         </MudPaper>
     }
 
-    @if (_selected.Count > 0)
-    {
-        int selectedTokens = _selected.Sum(passage => passage.Tokens);
-        int siteCount = ContextBuilder.CountSites(_selected);
-
-        <MudPaper Class="pa-4" Elevation="0" Outlined>
-            <MudText Typo="Typo.overline">@($"Debug: {_selected.Count} passages, {selectedTokens} / {_passageTokenBudget} tokens, {siteCount} sites")</MudText>
-
-            <MudStack Spacing="2" Class="mt-2">
-                @foreach (ScoredPassage selected in _selected)
-                {
-                    string preview = selected.Passage.Text.Length > 200 ? selected.Passage.Text[..200] + "…" : selected.Passage.Text;
-
-                    <MudPaper Class="pa-3" Elevation="0" Outlined>
-                        <MudText Typo="Typo.caption">@($"{selected.Score:P1} | {selected.Passage.Host} | {selected.Tokens} tokens")</MudText>
-                        <MudText Typo="Typo.body2" Class="mt-1" Style="white-space: pre-wrap;">@preview</MudText>
-                    </MudPaper>
-                }
-            </MudStack>
-        </MudPaper>
-    }
-
     @if (_results.Count > 0 && _scores.Length == _results.Count)
     {
         <MudPaper Class="pa-4" Elevation="0" Outlined>
@@ -149,7 +115,7 @@
                     <MudStack Row Spacing="2">
                         <MudLink Href="@result.Url" Target="_blank" rel="noopener noreferrer" Typo="Typo.body2">@result.Title</MudLink>
                         <MudText Typo="Typo.caption">@result.Engine</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Success">@score.ToString("P0")</MudText>
+                        <MudText Typo="Typo.caption" Color="@(score >= _pageThreshold ? Color.Success : Color.Error)">@score.ToString("P0")</MudText>
                     </MudStack>
                 }
             </MudStack>

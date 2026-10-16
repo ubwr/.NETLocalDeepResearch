@@ -110,6 +110,12 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
+        internal static string PageThreshold {
+            get {
+                return ResourceManager.GetString("PageThreshold", resourceCulture);
+            }
+        }
+
         internal static string ExecutiveSummary {
             get {
                 return ResourceManager.GetString("ExecutiveSummary", resourceCulture);
