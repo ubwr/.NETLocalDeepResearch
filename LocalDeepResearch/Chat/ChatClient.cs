@@ -5,7 +5,7 @@ using LMSupply.Generator.Abstractions;
 using LMSupply.Generator.Models;
 using Microsoft.Extensions.Options;
 
-namespace LocalDeepResearch.Services;
+namespace LocalDeepResearch.Chat;
 /// <summary>
 /// Client for interacting with our locally running LLM.
 /// </summary>
@@ -18,6 +18,11 @@ public class ChatClient
     {
         _options = options.Value;
     }
+    
+    /// <summary>
+    /// Result of the local LLM text generation.
+    /// </summary>
+    public GenerationResult? Result { get; private set; }
 
     /// <summary>
     /// If our local LLM is loaded.
@@ -27,10 +32,6 @@ public class ChatClient
     /// If we are using a GPU for inference.
     /// </summary>
     public bool IsGpuActive => _generatorModel?.IsGpuActive ?? false;
-    /// <summary>
-    /// Result of the local LLM text generation.
-    /// </summary>
-    public GenerationResult? Result { get; private set; }
     /// <summary>
     /// Maximum number of tokens we can use as context for a prompt.
     /// </summary>

@@ -1,5 +1,8 @@
 using LocalDeepResearch.Components;
-using LocalDeepResearch.Services;
+using LocalDeepResearch.Chat;
+using LocalDeepResearch.Extraction;
+using LocalDeepResearch.Reranking;
+using LocalDeepResearch.Search;
 using Microsoft.Extensions.Options;
 using MudBlazor.Services;
 

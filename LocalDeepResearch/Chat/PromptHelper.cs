@@ -1,6 +1,7 @@
 using System.Text;
+using LocalDeepResearch.Research;
 
-namespace LocalDeepResearch.Services;
+namespace LocalDeepResearch.Chat;
 
 /// <summary>
 /// Static class for prompting our local LLM.

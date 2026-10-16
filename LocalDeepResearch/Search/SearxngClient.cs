@@ -3,7 +3,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 
-namespace LocalDeepResearch.Services;
+namespace LocalDeepResearch.Search;
 /// <summary>
 /// Client for interacting with our locally running search engine.
 /// </summary>
@@ -64,17 +64,3 @@ public class SearxngClient
     /// <param name="Results"> Search results </param>
     private record SearchResponse(IReadOnlyList<SearchResult> Results);
 }
-/// <summary>
-/// Single search result that we receive back from local SearXNG API. 
-/// </summary>
-/// <param name="Url"> Source URL </param>
-/// <param name="Title"> Page title </param>
-/// <param name="Content"> Truncated snippet of the page's text content </param>
-/// <param name="Engine"> Search engine used </param>
-/// <param name="Category"> Search category that this result came from (general, science) </param>
-public record SearchResult(
-    string Url,
-    string Title,
-    string? Content,
-    string? Engine,
-    string? Category);

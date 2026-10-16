@@ -4,7 +4,7 @@ using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 
-namespace LocalDeepResearch.Services;
+namespace LocalDeepResearch.Extraction;
 
 /// <summary>
 /// Static class for chunking web page text content to feed into our local models.
@@ -121,15 +121,4 @@ public static class Chunker
     {
         return Whitespace.Replace(text, " ").Trim();
     }
-}
-
-/// <summary>
-/// A chunk of text that gets passed into a reranker for relevance scoring.
-/// </summary>
-/// <param name="Url"> URL that contains this passage </param>
-/// <param name="Title"> Title of the page that contains this passage</param>
-/// <param name="Text"> Text content from the page </param>
-public record Passage(string Url, string Title, string Text)
-{
-    public string Host => new Uri(Url).Host;
 }

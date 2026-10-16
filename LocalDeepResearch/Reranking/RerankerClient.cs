@@ -2,7 +2,7 @@ using LMSupply;
 using LMSupply.Reranker;
 using Microsoft.Extensions.Options;
 
-namespace LocalDeepResearch.Services;
+namespace LocalDeepResearch.Reranking;
 
 /// <summary>
 /// Client for interacting with our locally running reranker.

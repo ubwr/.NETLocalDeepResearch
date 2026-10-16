@@ -1,7 +1,11 @@
 using System.Text.Json;
 using LMSupply;
 using LocalDeepResearch.Resources;
-using LocalDeepResearch.Services;
+using LocalDeepResearch.Chat;
+using LocalDeepResearch.Extraction;
+using LocalDeepResearch.Reranking;
+using LocalDeepResearch.Research;
+using LocalDeepResearch.Search;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 

@@ -1,4 +1,4 @@
-namespace LocalDeepResearch.Services;
+namespace LocalDeepResearch.Research;
 
 /// <summary>
 /// A single section in our research output.

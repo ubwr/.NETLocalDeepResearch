@@ -1,4 +1,4 @@
-namespace LocalDeepResearch.Services;
+namespace LocalDeepResearch.Search;
 /// <summary>
 /// Options configuration for our local search engine.
 /// </summary>

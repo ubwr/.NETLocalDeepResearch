@@ -1,4 +1,4 @@
-namespace LocalDeepResearch.Services;
+namespace LocalDeepResearch.Chat;
 
 /// <summary>
 /// Options configuration for our local LLM.

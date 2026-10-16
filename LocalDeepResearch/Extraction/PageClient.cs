@@ -1,6 +1,6 @@
 using Trafilatura;
 
-namespace LocalDeepResearch.Services;
+namespace LocalDeepResearch.Extraction;
 
 /// <summary>
 /// Client for extracting text content from webpages.

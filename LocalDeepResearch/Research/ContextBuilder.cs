@@ -1,4 +1,4 @@
-namespace LocalDeepResearch.Services;
+namespace LocalDeepResearch.Research;
 
 /// <summary>
 /// Static class for building our model input context.
@@ -78,17 +78,3 @@ public static class ContextBuilder
             .ToList();
     }
 }
-
-/// <summary>
-/// Passage with its score and total token count.
-/// </summary>
-/// <param name="Passage"> Scored passage </param>
-/// <param name="Score"> Passage score </param>
-/// <param name="Tokens"> Total token count for this passage </param>
-public record ScoredPassage(Passage Passage, float Score, int Tokens);
-/// <summary>
-/// A single source used to answer a prompt.
-/// </summary>
-/// <param name="Title"> Page title </param>
-/// <param name="Url"> Page URL </param>
-public record Source(string Title, string Url);

@@ -1,4 +1,4 @@
-namespace LocalDeepResearch.Services;
+namespace LocalDeepResearch.Reranking;
 
 /// <summary>
 /// Options configuration for our local reranker.
