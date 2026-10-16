@@ -34,9 +34,9 @@ public partial class Home
     /// </summary>
     private string? _prompt;
     /// <summary>
-    /// Response from the local LLM.
+    /// List of completed research sections.
     /// </summary>
-    private string? _answer;
+    private List<Section> _sections = new();
     /// <summary>
     /// Error message.
     /// </summary>
@@ -129,7 +129,7 @@ public partial class Home
             await AskAsync();
     }
     /// <summary>
-    /// Sends our request with the user's prompt.
+    /// Sends our research request with the user's prompt.
     /// </summary>
     private async Task AskAsync()
     {
@@ -138,7 +138,7 @@ public partial class Home
 
         _busy = true;
         _error = null;
-        _answer = null;
+        _sections = new();
         _results = [];
         _scores = [];
         _keptCount = 0;
@@ -152,49 +152,26 @@ public partial class Home
 
             // Get our list of subquestions
             string planJson = await Chat.AskAsync(PromptHelper.PlannerSystemMessage, query, PromptHelper.PlanSchema);
-            _plan = JsonSerializer.Deserialize<ResearchPlan>(planJson, PlanJson);
+            _plan = JsonSerializer.Deserialize<ResearchPlan>(planJson, PlanJson)
+                ?? throw new InvalidOperationException("Failed to create a research plan.");
             StateHasChanged();
 
-            // Get our token count before adding any passages
-            int fixedTokens = await Chat.CountPromptTokensAsync(PromptHelper.SystemMessage, PromptHelper.Question(query));
-            _passageTokenBudget = Chat.PromptTokenBudget - fixedTokens;
+            List<SubQuestion> subQuestions = new() { _plan.History };
+            subQuestions.AddRange(_plan.SubQuestions);
 
-            _results = await Searxng.SearchAsync(query);
-            StateHasChanged();
-
-            List<SearchResult> relevantResults = [];
-
-            // Score and filter our search results
-            if (_results.Count > 0)
+            foreach (SubQuestion subQuestion in subQuestions)
             {
-                List<string> documents = _results.Select(r => $"{r.Title} {r.Content}").ToList();
-                _scores = await Reranker.ScoreAsync(query, documents);
+                Section? section = await ResearchAsync(subQuestion);
 
-                // Get relevant sources via filtering with index
-                relevantResults = Enumerable.Range(0, _results.Count)
-                    .Where(i => _scores[i] >= Reranker.PageThreshold)
-                    .OrderByDescending(i => _scores[i])
-                    .Select(i => _results[i])
-                    .ToList();
+                if (section is null)
+                    continue;
 
-                _keptCount = relevantResults.Count;
+                _sections.Add(section);
                 StateHasChanged();
             }
 
-            List<ScoredPassage> relevantPassages = await GatherPassagesAsync(query, relevantResults);
-
-            if (ContextBuilder.CountSites(relevantPassages) < MinSites)
-            {
+            if (_sections.Count == 0)
                 _error = Strings.NotEnoughSites;
-                return;
-            }
-
-            _selected = ContextBuilder.Select(relevantPassages, _passageTokenBudget);
-            _runStatus = string.Format(Strings.StatusSelected, _selected.Count, relevantPassages.Count);
-            StateHasChanged();
-
-            string userMessage = PromptHelper.UserMessage(_selected, query);
-            _answer = await Chat.AskAsync(PromptHelper.SystemMessage, userMessage);
         }
         catch (Exception ex)
         {
@@ -204,6 +181,55 @@ public partial class Home
         {
             _busy = false;
         }
+    }
+    /// <summary>
+    /// Sends a research question to our local LLM for a single section.
+    /// </summary>
+    /// <param name="subQuestion"> Subquestion to research </param>
+    /// <returns> Completed research section </returns>
+    private async Task<Section?> ResearchAsync(SubQuestion subQuestion)
+    {
+        string question = subQuestion.Question;
+
+        // Get our token count before adding any passages
+        int fixedTokens = await Chat.CountPromptTokensAsync(PromptHelper.SystemMessage, PromptHelper.Question(question));
+        _passageTokenBudget = Chat.PromptTokenBudget - fixedTokens;
+
+        _results = await Searxng.SearchAsync(question);
+        StateHasChanged();
+
+        List<SearchResult> relevantResults = [];
+
+        // Score and filter our search results
+        if (_results.Count > 0)
+        {
+            List<string> documents = _results.Select(r => $"{r.Title} {r.Content}").ToList();
+            _scores = await Reranker.ScoreAsync(question, documents);
+
+            // Get relevant sources via filtering with index
+            relevantResults = Enumerable.Range(0, _results.Count)
+                .Where(i => _scores[i] >= Reranker.PageThreshold)
+                .OrderByDescending(i => _scores[i])
+                .Select(i => _results[i])
+                .ToList();
+
+            _keptCount = relevantResults.Count;
+            StateHasChanged();
+        }
+
+        List<ScoredPassage> relevantPassages = await GatherPassagesAsync(question, relevantResults);
+
+        if (ContextBuilder.CountSites(relevantPassages) < MinSites)
+            return null;
+
+        _selected = ContextBuilder.Select(relevantPassages, _passageTokenBudget);
+        _runStatus = string.Format(Strings.StatusSelected, _selected.Count, relevantPassages.Count);
+        StateHasChanged();
+
+        string userMessage = PromptHelper.UserMessage(_selected, question);
+        string text = await Chat.AskAsync(PromptHelper.SystemMessage, userMessage);
+
+        return new Section(subQuestion.Heading, text, ContextBuilder.Sources(_selected));
     }
     /// <summary>
     /// Gets text passages from a list of relevant search results.

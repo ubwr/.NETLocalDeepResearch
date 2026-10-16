@@ -12,10 +12,13 @@ public static class PromptHelper
     /// </summary>
     public const string SystemMessage =
         "You are a research writer. " +
-        "Answer the user's question as a clear, well-organized report written in a professional tone. " +
+        "Write one section of a larger report as a single, detailed paragraph that answers only the given question. " +
+        "Other sections cover related topics, so stay on this question. " +
+        "Write in plain prose with a professional tone, without headings, lists, bullet points, or other formatting. " +
         "Use only the information in the provided documents. " +
         "Do not mention the documents, sources, or missing information. " +
-        "Do not include citations.";
+        "Do not include citations. " +
+        "Do not end with a conclusion or summary.";
     
     /// <summary>
     /// Custom system message to include when we need to generate a research plan.

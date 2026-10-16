@@ -74,18 +74,22 @@
         </MudPaper>
     }
 
-    @if (_answer is not null)
+    @if (_sections.Count > 0)
     {
         <MudPaper Class="pa-4" Elevation="0" Outlined>
-            <MudText Typo="Typo.body1" Style="white-space: pre-wrap;">@_answer</MudText>
+            @foreach (Section section in _sections)
+            {
+                <MudText Typo="Typo.h6">@section.Heading</MudText>
+                <MudText Typo="Typo.body1" Class="mt-2" Style="white-space: pre-wrap;">@section.Text</MudText>
 
-            <MudStack Spacing="1" AlignItems="AlignItems.Start" Class="mt-4">
-                <MudText Typo="Typo.subtitle2">@Strings.Sources</MudText>
-                @foreach (Source source in ContextBuilder.Sources(_selected))
-                {
-                    <MudLink Href="@source.Url" Target="_blank" rel="noopener noreferrer" Typo="Typo.body2">@source.Title</MudLink>
-                }
-            </MudStack>
+                <MudStack Spacing="1" AlignItems="AlignItems.Start" Class="mt-2 mb-6">
+                    <MudText Typo="Typo.subtitle2">@Strings.Sources</MudText>
+                    @foreach (Source source in section.Sources)
+                    {
+                        <MudLink Href="@source.Url" Target="_blank" rel="noopener noreferrer" Typo="Typo.body2">@source.Title</MudLink>
+                    }
+                </MudStack>
+            }
 
             @if (Chat.Result.HasValue)
             {
