@@ -78,15 +78,10 @@
     @if (_sections.Count > 0)
     {
         <MudPaper Class="pa-4" Elevation="0" Outlined>
-            @if (_findings is not null)
+            @if (_summary is not null)
             {
-                <MudText Typo="Typo.h6">@Strings.KeyFindings</MudText>
-                <MudStack Spacing="1" Class="mt-2 mb-6">
-                    @foreach (string finding in _findings.Findings)
-                    {
-                        <MudText Typo="Typo.body2">@finding</MudText>
-                    }
-                </MudStack>
+                <MudText Typo="Typo.h6">@Strings.ExecutiveSummary</MudText>
+                <MudText Typo="Typo.body1" Class="mt-2 mb-6" Style="white-space: pre-wrap;">@_summary</MudText>
             }
 
             @foreach (Section section in _sections)

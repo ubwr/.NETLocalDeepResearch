@@ -71,33 +71,16 @@ public static class PromptHelper
         """;
 
     /// <summary>
-    /// Custom system message to include when we need to generate a list of key findings from a report.
+    /// Custom system message to include when we need to generate a report summary.
     /// </summary>
-    public const string FindingsSystemMessage =
-        "You are a research analyst. " +
-        "From the provided report sections, list the most important findings for the report's topic, " +
-        "each written as a single, high-level sentence. " +
+    public const string SummarySystemMessage =
+        "You are a research writer. " +
+        "Write the executive summary of a report as a single paragraph that gives a high-level overview of the report's topic, " +
+        "based on the provided report sections. " +
+        "Write in plain prose with a professional tone, without headings, lists, bullet points, or other formatting. " +
         "Use only the information in the sections. " +
-        "Do not repeat the same point in more than one finding.";
-
-    /// <summary>
-    /// JSON schema to use for our key findings.
-    /// </summary>
-    public const string FindingsSchema = """
-        {
-          "type": "object",
-          "properties": {
-            "findings": {
-              "type": "array",
-              "minItems": 3,
-              "maxItems": 6,
-              "items": { "type": "string" }
-            }
-          },
-          "required": ["findings"],
-          "additionalProperties": false
-        }
-        """;
+        "Do not mention the sections, sources, or missing information. " +
+        "Do not include citations.";
 
     /// <summary>
     /// Formats passages by wrapping them in document tags to help the local LLM discern different passages.
@@ -109,12 +92,12 @@ public static class PromptHelper
         return $"<document>\n{text}\n</document>\n\n";
     }
     /// <summary>
-    /// Creates a single query string to get key findings from a list of text sections and a report title.
+    /// Creates a single query string to get a report summary from a list of text sections and a report title.
     /// </summary>
-    /// <param name="sections"> Text sections used to get key findings </param>
+    /// <param name="sections"> Text sections used to get report summary </param>
     /// <param name="title"> Report title; used as additional context </param>
-    /// <returns> Key findings query as a single string </returns>
-    public static string FindingsMessage(IReadOnlyList<Section> sections, string title)
+    /// <returns> Report summary query as a single string </returns>
+    public static string ReportSummaryMessage(IReadOnlyList<Section> sections, string title)
     {
         var builder = new StringBuilder();
 

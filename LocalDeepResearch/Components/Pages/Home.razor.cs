@@ -86,9 +86,9 @@ public partial class Home
     /// </summary>
     private ResearchPlan? _plan;
     /// <summary>
-    /// Key findings in a research report.
+    /// Summary of our research report.
     /// </summary>
-    private KeyFindings? _findings;
+    private string? _summary;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -149,7 +149,7 @@ public partial class Home
         _runStatus = null;
         _selected = [];
         _plan = null;
-        _findings = null;
+        _summary = null;
 
         try
         {
@@ -186,9 +186,9 @@ public partial class Home
                 return;
             }
 
-            string findingsJson = await Chat.AskAsync(PromptHelper.FindingsSystemMessage, PromptHelper.FindingsMessage(_sections, _plan.Title), PromptHelper.FindingsSchema);
-            _findings = JsonSerializer.Deserialize<KeyFindings>(findingsJson, ModelJson)
-                ?? throw new InvalidOperationException("Failed to create key findings.");
+            string reportSummaryMessage = PromptHelper.ReportSummaryMessage(_sections, _plan.Title);
+
+            _summary = await Chat.AskAsync(PromptHelper.SummarySystemMessage, reportSummaryMessage);
         }
         catch (Exception ex)
         {

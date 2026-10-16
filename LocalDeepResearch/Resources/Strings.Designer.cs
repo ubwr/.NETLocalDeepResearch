@@ -110,9 +110,9 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
-        internal static string KeyFindings {
+        internal static string ExecutiveSummary {
             get {
-                return ResourceManager.GetString("KeyFindings", resourceCulture);
+                return ResourceManager.GetString("ExecutiveSummary", resourceCulture);
             }
         }
     }
