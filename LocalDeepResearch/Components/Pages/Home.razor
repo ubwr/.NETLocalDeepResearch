@@ -62,6 +62,7 @@
 
         <MudPaper Class="pa-4" Elevation="0" Outlined>
             <MudText Typo="Typo.overline">Debug: plan</MudText>
+            <MudText Typo="Typo.subtitle1">@_plan.Title</MudText>
             <MudStack Spacing="2" Class="mt-2">
                 @foreach (SubQuestion subQuestion in plannedQuestions)
                 {
@@ -77,6 +78,17 @@
     @if (_sections.Count > 0)
     {
         <MudPaper Class="pa-4" Elevation="0" Outlined>
+            @if (_findings is not null)
+            {
+                <MudText Typo="Typo.h6">@Strings.KeyFindings</MudText>
+                <MudStack Spacing="1" Class="mt-2 mb-6">
+                    @foreach (string finding in _findings.Findings)
+                    {
+                        <MudText Typo="Typo.body2">@finding</MudText>
+                    }
+                </MudStack>
+            }
+
             @foreach (Section section in _sections)
             {
                 <MudText Typo="Typo.h6">@section.Heading</MudText>

@@ -13,7 +13,7 @@ public static class PromptHelper
     public const string SystemMessage =
         "You are a research writer. " +
         "Write one section of a larger report as a single, detailed paragraph that answers only the given question. " +
-        "Other sections cover related topics, so stay on this question. " +
+        "Do not cover the topics of the other sections listed, since they are covered separately. " +
         "Write in plain prose with a professional tone, without headings, lists, bullet points, or other formatting. " +
         "Use only the information in the provided documents. " +
         "Do not mention the documents, sources, or missing information. " +
@@ -25,6 +25,7 @@ public static class PromptHelper
     /// </summary>
     public const string PlannerSystemMessage =
         "You are a research planner. " +
+        "Write a short title for the report. " +
         "Write one subquestion about the history of the topic. " +
         "Then break the user's research question into 3 to 5 subquestions that together fully answer it, " +
         "ordered so a report built from them reads naturally, from background to specifics. " +
@@ -39,6 +40,7 @@ public static class PromptHelper
         {
           "type": "object",
           "properties": {
+            "title": { "type": "string" },
             "history": {
               "type": "object",
               "properties": {
@@ -63,7 +65,36 @@ public static class PromptHelper
               }
             }
           },
-          "required": ["history", "subQuestions"],
+          "required": ["title", "history", "subQuestions"],
+          "additionalProperties": false
+        }
+        """;
+
+    /// <summary>
+    /// Custom system message to include when we need to generate a list of key findings from a report.
+    /// </summary>
+    public const string FindingsSystemMessage =
+        "You are a research analyst. " +
+        "From the provided report sections, list the most important findings for the report's topic, " +
+        "each written as a single, high-level sentence. " +
+        "Use only the information in the sections. " +
+        "Do not repeat the same point in more than one finding.";
+
+    /// <summary>
+    /// JSON schema to use for our key findings.
+    /// </summary>
+    public const string FindingsSchema = """
+        {
+          "type": "object",
+          "properties": {
+            "findings": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 6,
+              "items": { "type": "string" }
+            }
+          },
+          "required": ["findings"],
           "additionalProperties": false
         }
         """;
@@ -78,20 +109,48 @@ public static class PromptHelper
         return $"<document>\n{text}\n</document>\n\n";
     }
     /// <summary>
-    /// Creates a single user message string from a list of passages and a question.
+    /// Creates a single query string to get key findings from a list of text sections and a report title.
+    /// </summary>
+    /// <param name="sections"> Text sections used to get key findings </param>
+    /// <param name="title"> Report title; used as additional context </param>
+    /// <returns> Key findings query as a single string </returns>
+    public static string FindingsMessage(IReadOnlyList<Section> sections, string title)
+    {
+        var builder = new StringBuilder();
+
+        foreach (Section section in sections)
+            builder.Append($"<section>\n{section.Heading}\n{section.Text}\n</section>\n\n");
+
+        builder.Append($"Report title: {title}");
+        return builder.ToString();
+    }
+    /// <summary>
+    /// Creates a single query string from a list of passages and a question.
     /// </summary>
     /// <param name="passages"> List of text passages </param>
     /// <param name="question"> Question for local LLM </param>
-    /// <returns> User message as a single string </returns>
-    public static string UserMessage(IReadOnlyList<ScoredPassage> passages, string question)
+    /// <param name="otherHeadings"> Other section headings so that output information is not duplicated </param>
+    /// <returns> User query as a single string </returns>
+    public static string UserMessage(IReadOnlyList<ScoredPassage> passages, string question, IReadOnlyList<string> otherHeadings)
     {
         var builder = new StringBuilder();
 
         foreach (ScoredPassage passage in passages)
             builder.Append(Document(passage.Passage.Text));
 
-        builder.Append(Question(question));
+        builder.Append(SectionRequest(question, otherHeadings));
         return builder.ToString();
+    }
+    /// <summary>
+    /// Section specific information for this single request.
+    /// Contains other section headers (so that this specific response ignores them) and the research question.
+    /// </summary>
+    /// <param name="question"> Research question </param>
+    /// <param name="otherHeadings"> Other section headings so that output information is not duplicated </param>
+    /// <returns> Section request string </returns>
+    public static string SectionRequest(string question, IReadOnlyList<string> otherHeadings)
+    {
+        return $"Other sections: {string.Join(", ", otherHeadings)}\n{Question(question)}";
     }
     /// <summary>
     /// Prepends question prompt with a label. This function is used so we can get a more accurate token count.

@@ -109,5 +109,11 @@ namespace LocalDeepResearch.Resources {
                 return ResourceManager.GetString("Sources", resourceCulture);
             }
         }
+
+        internal static string KeyFindings {
+            get {
+                return ResourceManager.GetString("KeyFindings", resourceCulture);
+            }
+        }
     }
 }

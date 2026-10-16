@@ -91,4 +91,7 @@
   <data name="Sources" xml:space="preserve">
     <value>Sources</value>
   </data>
+  <data name="KeyFindings" xml:space="preserve">
+    <value>Key Findings</value>
+  </data>
 </root>

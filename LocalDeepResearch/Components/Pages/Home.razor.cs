@@ -22,7 +22,7 @@ public partial class Home
     /// </summary>
     private const int MinSites = 2;
 
-    private static readonly JsonSerializerOptions PlanJson = new(JsonSerializerDefaults.Web);
+    private static readonly JsonSerializerOptions ModelJson = new(JsonSerializerDefaults.Web);
 
     [Inject] private ChatClient Chat { get; set; }
     [Inject] private SearxngClient Searxng { get; set; }
@@ -85,6 +85,10 @@ public partial class Home
     /// The full set of subquestions to prompt our LLM.
     /// </summary>
     private ResearchPlan? _plan;
+    /// <summary>
+    /// Key findings in a research report.
+    /// </summary>
+    private KeyFindings? _findings;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -145,6 +149,7 @@ public partial class Home
         _runStatus = null;
         _selected = [];
         _plan = null;
+        _findings = null;
 
         try
         {
@@ -152,7 +157,7 @@ public partial class Home
 
             // Get our list of subquestions
             string planJson = await Chat.AskAsync(PromptHelper.PlannerSystemMessage, query, PromptHelper.PlanSchema);
-            _plan = JsonSerializer.Deserialize<ResearchPlan>(planJson, PlanJson)
+            _plan = JsonSerializer.Deserialize<ResearchPlan>(planJson, ModelJson)
                 ?? throw new InvalidOperationException("Failed to create a research plan.");
             StateHasChanged();
 
@@ -161,7 +166,12 @@ public partial class Home
 
             foreach (SubQuestion subQuestion in subQuestions)
             {
-                Section? section = await ResearchAsync(subQuestion);
+                List<string> otherHeadings = subQuestions
+                    .Where(other => other != subQuestion)
+                    .Select(other => other.Heading)
+                    .ToList();
+
+                Section? section = await ResearchAsync(subQuestion, otherHeadings);
 
                 if (section is null)
                     continue;
@@ -171,7 +181,14 @@ public partial class Home
             }
 
             if (_sections.Count == 0)
+            {
                 _error = Strings.NotEnoughSites;
+                return;
+            }
+
+            string findingsJson = await Chat.AskAsync(PromptHelper.FindingsSystemMessage, PromptHelper.FindingsMessage(_sections, _plan.Title), PromptHelper.FindingsSchema);
+            _findings = JsonSerializer.Deserialize<KeyFindings>(findingsJson, ModelJson)
+                ?? throw new InvalidOperationException("Failed to create key findings.");
         }
         catch (Exception ex)
         {
@@ -186,13 +203,14 @@ public partial class Home
     /// Sends a research question to our local LLM for a single section.
     /// </summary>
     /// <param name="subQuestion"> Subquestion to research </param>
+    /// <param name="otherHeadings"> Other section headings so that output information is not duplicated </param>
     /// <returns> Completed research section </returns>
-    private async Task<Section?> ResearchAsync(SubQuestion subQuestion)
+    private async Task<Section?> ResearchAsync(SubQuestion subQuestion, IReadOnlyList<string> otherHeadings)
     {
         string question = subQuestion.Question;
 
         // Get our token count before adding any passages
-        int fixedTokens = await Chat.CountPromptTokensAsync(PromptHelper.SystemMessage, PromptHelper.Question(question));
+        int fixedTokens = await Chat.CountPromptTokensAsync(PromptHelper.SystemMessage, PromptHelper.SectionRequest(question, otherHeadings));
         _passageTokenBudget = Chat.PromptTokenBudget - fixedTokens;
 
         _results = await Searxng.SearchAsync(question);
@@ -226,7 +244,7 @@ public partial class Home
         _runStatus = string.Format(Strings.StatusSelected, _selected.Count, relevantPassages.Count);
         StateHasChanged();
 
-        string userMessage = PromptHelper.UserMessage(_selected, question);
+        string userMessage = PromptHelper.UserMessage(_selected, question, otherHeadings);
         string text = await Chat.AskAsync(PromptHelper.SystemMessage, userMessage);
 
         return new Section(subQuestion.Heading, text, ContextBuilder.Sources(_selected));
