@@ -20,4 +20,17 @@ public static class Helpers
 
         return duration.ToString(@"s\s");
     }
+    /// <summary>
+    /// Truncates text to a given length.
+    /// </summary>
+    /// <param name="text"> Text to truncate </param>
+    /// <param name="maxLength"> Maximum text length </param>
+    /// <returns> Truncated string </returns>
+    public static string Truncate(string text, int maxLength)
+    {
+        if (text.Length <= maxLength)
+            return text;
+
+        return text.Substring(0, maxLength) + "...";
+    }
 }

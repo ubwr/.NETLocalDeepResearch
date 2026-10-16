@@ -20,7 +20,7 @@
     <MudSlider T="double"
                @bind-Value="_pageThreshold"
                Min="0"
-               Max="0.9"
+               Max="1"
                Step="0.1"
                ValueLabel
                Disabled="_busy || _loadingModel">@string.Format(Strings.PageThreshold, _pageThreshold)</MudSlider>
@@ -67,6 +67,11 @@
     @if (_sections.Count > 0)
     {
         <MudPaper Class="pa-4" Elevation="0" Outlined>
+            @if (_plan is not null)
+            {
+                <MudText Typo="Typo.h5" Class="mb-4">@_plan.Title</MudText>
+            }
+
             @if (_summary is not null)
             {
                 <MudText Typo="Typo.h6">@Strings.ExecutiveSummary</MudText>
@@ -78,13 +83,16 @@
                 <MudText Typo="Typo.h6">@section.Heading</MudText>
                 <MudText Typo="Typo.body1" Class="mt-2" Style="white-space: pre-wrap;">@section.Text</MudText>
 
-                <MudStack Spacing="1" AlignItems="AlignItems.Start" Class="mt-2 mb-6">
-                    <MudText Typo="Typo.subtitle2">@Strings.Sources</MudText>
-                    @foreach (Source source in section.Sources)
-                    {
-                        <MudLink Href="@source.Url" Target="_blank" rel="noopener noreferrer" Typo="Typo.body2">@source.Title</MudLink>
-                    }
-                </MudStack>
+                <MudExpansionPanels Elevation="0" Outlined Dense Class="mt-2 mb-6">
+                    <MudExpansionPanel Text="@Strings.Sources">
+                        <MudStack Spacing="1" AlignItems="AlignItems.Start">
+                            @foreach (Source source in section.Sources)
+                            {
+                                <MudLink Href="@source.Url" Target="_blank" rel="noopener noreferrer" Typo="Typo.body2">@Helpers.Truncate(source.Title, MaxSourceLengthChars)</MudLink>
+                            }
+                        </MudStack>
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
             }
 
             @if (Chat.Result.HasValue)
@@ -112,9 +120,10 @@
                     SearchResult result = _results[i];
                     float score = _scores[i];
 
-                    <MudStack Row Spacing="2">
-                        <MudLink Href="@result.Url" Target="_blank" rel="noopener noreferrer" Typo="Typo.body2">@result.Title</MudLink>
+                    <MudStack Row Spacing="2" AlignItems="AlignItems.Center">
+                        <MudLink Href="@result.Url" Target="_blank" rel="noopener noreferrer" Typo="Typo.body2">@Helpers.Truncate(result.Title, MaxSourceLengthChars)</MudLink>
                         <MudText Typo="Typo.caption">@result.Engine</MudText>
+                        <MudSpacer />
                         <MudText Typo="Typo.caption" Color="@(score >= _pageThreshold ? Color.Success : Color.Error)">@score.ToString("P0")</MudText>
                     </MudStack>
                 }

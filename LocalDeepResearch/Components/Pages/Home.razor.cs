@@ -25,6 +25,10 @@ public partial class Home
     /// Minimum number of unique sites required for a search query to be valid.
     /// </summary>
     private const int MinSites = 2;
+    /// <summary>
+    /// Maximum text length in chars a single source can be.
+    /// </summary>
+    private const int MaxSourceLengthChars = 50;
 
     private static readonly JsonSerializerOptions ModelJson = new(JsonSerializerDefaults.Web);
 

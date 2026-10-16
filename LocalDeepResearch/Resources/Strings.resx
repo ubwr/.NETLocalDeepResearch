@@ -92,7 +92,7 @@
     <value>Sources</value>
   </data>
   <data name="PageThreshold" xml:space="preserve">
-    <value>Page threshold: {0:0.0}</value>
+    <value>Page relevance threshold: {0:0.0}</value>
   </data>
   <data name="ExecutiveSummary" xml:space="preserve">
     <value>Executive Summary</value>
