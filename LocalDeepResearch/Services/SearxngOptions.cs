@@ -8,5 +8,6 @@ public class SearxngOptions
     public string Categories { get; set; } = "general,science";
     public string Language { get; set; } = "en";
     public int MaxResults { get; set; } = 100;
+    public int PageCount { get; set; } = 2;
     public int TimeoutSeconds { get; set; } = 15;
 }

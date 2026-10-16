@@ -8,7 +8,7 @@ namespace LocalDeepResearch.Services;
 public static class PromptHelper
 {
     /// <summary>
-    /// Custom system message to include in all of our prompts.
+    /// Custom system message to include in our research prompts.
     /// </summary>
     public const string SystemMessage =
         "You are a research writer. " +
@@ -16,6 +16,54 @@ public static class PromptHelper
         "Use only the information in the provided documents. " +
         "Do not mention the documents, sources, or missing information. " +
         "Do not include citations.";
+    
+    /// <summary>
+    /// Custom system message to include when we need to generate a research plan.
+    /// </summary>
+    public const string PlannerSystemMessage =
+        "You are a research planner. " +
+        "Write one subquestion about the history of the topic. " +
+        "Then break the user's research question into 3 to 5 subquestions that together fully answer it, " +
+        "ordered so a report built from them reads naturally, from background to specifics. " +
+        "Do not include any subquestions about history, since history is handled separately. " +
+        "For each subquestion, give a short section heading and a short, concise, self-contained question. " +
+        "Do not include a summary or introduction.";
+
+    /// <summary>
+    /// JSON schema to use for our research plan.
+    /// </summary>
+    public const string PlanSchema = """
+        {
+          "type": "object",
+          "properties": {
+            "history": {
+              "type": "object",
+              "properties": {
+                "heading": { "type": "string" },
+                "question": { "type": "string" }
+              },
+              "required": ["heading", "question"],
+              "additionalProperties": false
+            },
+            "subQuestions": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 5,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "heading": { "type": "string" },
+                  "question": { "type": "string" }
+                },
+                "required": ["heading", "question"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["history", "subQuestions"],
+          "additionalProperties": false
+        }
+        """;
 
     /// <summary>
     /// Formats passages by wrapping them in document tags to help the local LLM discern different passages.

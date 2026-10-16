@@ -6,5 +6,6 @@ namespace LocalDeepResearch.Services;
 public class RerankerOptions
 {
     public string ModelId { get; set; } = "default";
-    public double Threshold { get; set; } = 0.95;
+    public double PageThreshold { get; set; } = 0.5;
+    public double PassageThreshold { get; set; } = 0.95;
 }

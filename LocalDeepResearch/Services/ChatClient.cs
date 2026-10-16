@@ -72,17 +72,18 @@ public class ChatClient
     /// </summary>
     /// <param name="systemMessage"> System message for our local LLM </param>
     /// <param name="userMessage"> Full user prompt for our local LLM </param>
+    /// <param name="jsonSchema"> Json schema to request for our text generation response </param>
     /// <param name="ct"> Cancellation token </param>
     /// <returns> Response from model </returns>
     /// <exception cref="InvalidOperationException"> Error when LLM is not loaded </exception>
-    public async Task<string> AskAsync(string systemMessage, string userMessage, CancellationToken ct = default)
+    public async Task<string> AskAsync(string systemMessage, string userMessage, string? jsonSchema = null, CancellationToken ct = default)
     {
         if (!IsModelLoaded)
             throw new InvalidOperationException("Selected LLM is not loaded.");
 
         var result = await _generatorModel.GenerateChatCompleteResultAsync(
             CreateMessages(systemMessage, userMessage),
-            CreateGenerationOptions(),
+            CreateGenerationOptions(jsonSchema),
             ct);
 
         Result = result;
@@ -124,14 +125,16 @@ public class ChatClient
     /// <summary>
     /// Creates a <see cref="GenerationOptions"/> object with our custom configuration.
     /// </summary>
+    /// <param name="jsonSchema"> Json schema to request for our text generation response </param>
     /// <returns> Generation configuration </returns>
-    private GenerationOptions CreateGenerationOptions()
+    private GenerationOptions CreateGenerationOptions(string? jsonSchema = null)
     {
         return new GenerationOptions
         {
             MaxTokens = _options.MaxOutputTokens,
             Temperature = (float)_options.Temperature,
-            FilterReasoningTokens = true
+            FilterReasoningTokens = true,
+            JsonSchema = jsonSchema
         };
     }
     /// <summary>

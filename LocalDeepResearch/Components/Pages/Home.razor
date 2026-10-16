@@ -55,6 +55,25 @@
         <MudAlert Severity="Severity.Error">@_error</MudAlert>
     }
 
+    @if (_plan is not null)
+    {
+        List<SubQuestion> plannedQuestions = new() { _plan.History };
+        plannedQuestions.AddRange(_plan.SubQuestions);
+
+        <MudPaper Class="pa-4" Elevation="0" Outlined>
+            <MudText Typo="Typo.overline">Debug: plan</MudText>
+            <MudStack Spacing="2" Class="mt-2">
+                @foreach (SubQuestion subQuestion in plannedQuestions)
+                {
+                    <div>
+                        <MudText Typo="Typo.subtitle2">@subQuestion.Heading</MudText>
+                        <MudText Typo="Typo.body2">@subQuestion.Question</MudText>
+                    </div>
+                }
+            </MudStack>
+        </MudPaper>
+    }
+
     @if (_answer is not null)
     {
         <MudPaper Class="pa-4" Elevation="0" Outlined>
@@ -112,9 +131,6 @@
             <MudStack Spacing="1">
                 @for (int i = 0; i < _results.Count; i++)
                 {
-                    if (_scores[i] < Reranker.Threshold)
-                        continue;
-
                     SearchResult result = _results[i];
                     float score = _scores[i];
 

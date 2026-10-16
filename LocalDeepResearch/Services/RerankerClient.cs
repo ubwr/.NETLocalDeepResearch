@@ -22,9 +22,13 @@ public class RerankerClient
     /// </summary>
     public bool IsModelLoaded => _rerankerModel is not null;
     /// <summary>
-    /// Threshold that we compare document scores to for filtering.
+    /// Threshold that we compare text passage scores to for filtering.
     /// </summary>
-    public double Threshold => _options.Threshold;
+    public double PassageThreshold => _options.PassageThreshold;
+    /// <summary>
+    /// Threshold that we compare webpage scores to for filtering.
+    /// </summary>
+    public double PageThreshold => _options.PageThreshold;
 
     /// <summary>
     /// Does the initial loading of our local reranker.

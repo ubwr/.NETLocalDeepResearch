@@ -30,21 +30,33 @@ public class SearxngClient
     /// <returns> List of <see cref="SearchResult"/> objects that we get back from API </returns>
     public async Task<IReadOnlyList<SearchResult>> SearchAsync(string query, CancellationToken ct = default)
     {
-        // SearXNG expects a query string instead of a json request body
-        string url = QueryHelpers.AddQueryString("/search", new Dictionary<string, string?>
+        List<SearchResult> results = new();
+
+        for (int page = 1; page <= _options.PageCount; page++)
         {
-            ["q"] = query,
-            ["format"] = "json",
-            ["categories"] = _options.Categories,
-            ["language"] = _options.Language
-        });
+            // SearXNG expects a query string instead of a json request body
+            string url = QueryHelpers.AddQueryString("/search", new Dictionary<string, string?>
+            {
+                ["q"] = query,
+                ["format"] = "json",
+                ["categories"] = _options.Categories,
+                ["language"] = _options.Language,
+                ["pageno"] = page.ToString()
+            });
 
-        SearchResponse? response = await _http.GetFromJsonAsync<SearchResponse>(url, Json, ct);
+            SearchResponse? response = await _http.GetFromJsonAsync<SearchResponse>(url, Json, ct);
 
-        return response?.Results
+            if (response is null || response.Results.Count == 0)
+                break;
+
+            results.AddRange(response.Results);
+        }
+
+        return results
             .Where(result => !string.IsNullOrWhiteSpace(result.Url))
+            .DistinctBy(result => result.Url)
             .Take(_options.MaxResults)
-            .ToList() ?? [];
+            .ToList();
     }
     /// <summary>
     /// List of search results that we receive back from local SearXNG API.

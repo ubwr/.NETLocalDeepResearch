@@ -1,3 +1,4 @@
+using System.Text.Json;
 using LMSupply;
 using LocalDeepResearch.Resources;
 using LocalDeepResearch.Services;
@@ -20,6 +21,8 @@ public partial class Home
     /// Minimum number of unique sites required for a search query to be valid.
     /// </summary>
     private const int MinSites = 2;
+
+    private static readonly JsonSerializerOptions PlanJson = new(JsonSerializerDefaults.Web);
 
     [Inject] private ChatClient Chat { get; set; }
     [Inject] private SearxngClient Searxng { get; set; }
@@ -78,6 +81,10 @@ public partial class Home
     /// Maximum number of tokens our passages can use as context.
     /// </summary>
     private int _passageTokenBudget;
+    /// <summary>
+    /// The full set of subquestions to prompt our LLM.
+    /// </summary>
+    private ResearchPlan? _plan;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -137,10 +144,16 @@ public partial class Home
         _keptCount = 0;
         _runStatus = null;
         _selected = [];
+        _plan = null;
 
         try
         {
             string query = _prompt.Trim();
+
+            // Get our list of subquestions
+            string planJson = await Chat.AskAsync(PromptHelper.PlannerSystemMessage, query, PromptHelper.PlanSchema);
+            _plan = JsonSerializer.Deserialize<ResearchPlan>(planJson, PlanJson);
+            StateHasChanged();
 
             // Get our token count before adding any passages
             int fixedTokens = await Chat.CountPromptTokensAsync(PromptHelper.SystemMessage, PromptHelper.Question(query));
@@ -159,7 +172,7 @@ public partial class Home
 
                 // Get relevant sources via filtering with index
                 relevantResults = Enumerable.Range(0, _results.Count)
-                    .Where(i => _scores[i] >= Reranker.Threshold)
+                    .Where(i => _scores[i] >= Reranker.PageThreshold)
                     .OrderByDescending(i => _scores[i])
                     .Select(i => _results[i])
                     .ToList();
@@ -239,7 +252,7 @@ public partial class Home
 
                 for (int i = 0; i < passages.Count; i++)
                 {
-                    if (scores[i] < Reranker.Threshold)
+                    if (scores[i] < Reranker.PassageThreshold)
                         continue;
 
                     int tokens = await Chat.CountTokensAsync(PromptHelper.Document(passages[i].Text));
