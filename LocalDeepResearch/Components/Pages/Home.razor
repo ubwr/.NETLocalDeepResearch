@@ -140,7 +140,7 @@
         <MudPaper Class="pa-4" Elevation="0" Outlined>
             <MudText Typo="Typo.overline">@_keptCount / @_results.Count</MudText>
             <MudStack Spacing="1">
-                @for (int i = 0; i < _results.Count; i++)
+                @foreach (int i in Enumerable.Range(0, _results.Count).OrderByDescending(index => _scores[index]))
                 {
                     SearchResult result = _results[i];
                     float score = _scores[i];
