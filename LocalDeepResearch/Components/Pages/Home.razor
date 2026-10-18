@@ -17,13 +17,16 @@
                   OnKeyDown="OnKeyDown"
                   FullWidth />
 
-    <MudSlider T="double"
-               @bind-Value="_pageThreshold"
-               Min="0"
-               Max="1"
-               Step="0.1"
-               ValueLabel
-               Disabled="_busy || _loadingModel">@string.Format(Strings.PageThreshold, _pageThreshold)</MudSlider>
+    @if (!_busy)
+    {
+        <MudSlider T="double"
+                   @bind-Value="_pageThreshold"
+                   Min="0"
+                   Max="1"
+                   Step="0.1"
+                   ValueLabel
+                   Disabled="_loadingModel">@string.Format(Strings.PageThreshold, _pageThreshold)</MudSlider>
+    }
 
     @if (_loadingModel)
     {
@@ -41,10 +44,14 @@
     {
         <MudStack Spacing="1">
             <MudProgressLinear Indeterminate Color="Color.Primary"/>
-            @if (_runStatus is not null)
-            {
-                <MudText Typo="Typo.caption">@_runStatus</MudText>
-            }
+            <MudStack Row AlignItems="AlignItems.Center">
+                @if (_runStatus is not null)
+                {
+                    <MudText Typo="Typo.caption">@_runStatus</MudText>
+                }
+                <MudSpacer />
+                <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small" OnClick="CancelRun">@Strings.Cancel</MudButton>
+            </MudStack>
         </MudStack>
     }
 
@@ -62,6 +69,11 @@
     @if (_error is not null)
     {
         <MudAlert Severity="Severity.Error">@_error</MudAlert>
+    }
+
+    @if (_notice is not null)
+    {
+        <MudAlert Severity="Severity.Info">@_notice</MudAlert>
     }
 
     @if (_sections.Count > 0)

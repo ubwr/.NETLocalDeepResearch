@@ -31,6 +31,8 @@ public partial class Home
     private const int MaxSourceLengthChars = 50;
 
     private static readonly JsonSerializerOptions ModelJson = new(JsonSerializerDefaults.Web);
+    
+    private CancellationTokenSource? _cancellation;
 
     [Inject] private ChatClient Chat { get; set; }
     [Inject] private SearxngClient Searxng { get; set; }
@@ -89,6 +91,10 @@ public partial class Home
     /// Minimum relevance score (0 to 1) a search result needs for its page to get fetched.
     /// </summary>
     private double _pageThreshold;
+    /// <summary>
+    /// Request cancellation message.
+    /// </summary>
+    private string? _notice;
     /// <summary>
     /// Summary of our research report.
     /// </summary>
@@ -151,6 +157,7 @@ public partial class Home
 
         _busy = true;
         _error = null;
+        _notice = null;
         _sections = new();
         _results = [];
         _scores = [];
@@ -158,13 +165,15 @@ public partial class Home
         _runStatus = null;
         _plan = null;
         _summary = null;
+        _cancellation = new CancellationTokenSource();
+        CancellationToken ct = _cancellation.Token;
 
         try
         {
             string query = _prompt.Trim();
 
             // Get our list of subquestions
-            string planJson = await Chat.AskAsync(PromptHelper.PlannerSystemMessage, query, PromptHelper.PlanSchema);
+            string planJson = await Chat.AskAsync(PromptHelper.PlannerSystemMessage, query, PromptHelper.PlanSchema, ct);
             _plan = JsonSerializer.Deserialize<ResearchPlan>(planJson, ModelJson)
                 ?? throw new InvalidOperationException("Failed to create a research plan.");
             StateHasChanged();
@@ -179,7 +188,7 @@ public partial class Home
                     .Select(other => other.Heading)
                     .ToList();
 
-                Section? section = await ResearchAsync(subQuestion, otherHeadings);
+                Section? section = await ResearchAsync(subQuestion, otherHeadings, ct);
 
                 if (section is null)
                     continue;
@@ -196,7 +205,11 @@ public partial class Home
 
             string reportSummaryMessage = PromptHelper.ReportSummaryMessage(_sections, _plan.Title);
 
-            _summary = await Chat.AskAsync(PromptHelper.SummarySystemMessage, reportSummaryMessage);
+            _summary = await Chat.AskAsync(PromptHelper.SummarySystemMessage, reportSummaryMessage, ct: ct);
+        }
+        catch (OperationCanceledException)
+        {
+            _notice = Strings.RunCancelled;
         }
         catch (Exception ex)
         {
@@ -204,24 +217,34 @@ public partial class Home
         }
         finally
         {
+            _cancellation.Dispose();
+            _cancellation = null;
             _busy = false;
         }
+    }
+    /// <summary>
+    /// Cancels the user's research request.
+    /// </summary>
+    private void CancelRun()
+    {
+        _cancellation?.Cancel();
     }
     /// <summary>
     /// Sends a research question to our local LLM for a single section.
     /// </summary>
     /// <param name="subQuestion"> Subquestion to research </param>
     /// <param name="otherHeadings"> Other section headings so that output information is not duplicated </param>
+    /// <param name="ct"> Cancellation token </param>
     /// <returns> Completed research section </returns>
-    private async Task<Section?> ResearchAsync(SubQuestion subQuestion, IReadOnlyList<string> otherHeadings)
+    private async Task<Section?> ResearchAsync(SubQuestion subQuestion, IReadOnlyList<string> otherHeadings, CancellationToken ct)
     {
         string question = subQuestion.Question;
 
         // Get our token count before adding any passages
-        int fixedTokens = await Chat.CountPromptTokensAsync(PromptHelper.SystemMessage, PromptHelper.SectionRequest(question, otherHeadings));
+        int fixedTokens = await Chat.CountPromptTokensAsync(PromptHelper.SystemMessage, PromptHelper.SectionRequest(question, otherHeadings), ct);
         int passageTokenBudget = Chat.PromptTokenBudget - fixedTokens;
 
-        _results = await Searxng.SearchAsync(question);
+        _results = await Searxng.SearchAsync(question, ct);
         StateHasChanged();
 
         List<SearchResult> relevantResults = [];
@@ -230,7 +253,7 @@ public partial class Home
         if (_results.Count > 0)
         {
             List<string> documents = _results.Select(r => $"{r.Title} {r.Content}").ToList();
-            _scores = await Reranker.ScoreAsync(question, documents);
+            _scores = await Reranker.ScoreAsync(question, documents, ct);
 
             // Get relevant sources via filtering with index
             relevantResults = Enumerable.Range(0, _results.Count)
@@ -243,7 +266,7 @@ public partial class Home
             StateHasChanged();
         }
 
-        List<ScoredPassage> relevantPassages = await GatherPassagesAsync(question, relevantResults, passageTokenBudget);
+        List<ScoredPassage> relevantPassages = await GatherPassagesAsync(question, relevantResults, passageTokenBudget, ct);
 
         if (ContextBuilder.CountSites(relevantPassages) < MinSites)
             return null;
@@ -253,7 +276,7 @@ public partial class Home
         StateHasChanged();
 
         string userMessage = PromptHelper.UserMessage(selected, question, otherHeadings);
-        string text = await Chat.AskAsync(PromptHelper.SystemMessage, userMessage);
+        string text = await Chat.AskAsync(PromptHelper.SystemMessage, userMessage, ct: ct);
 
         return new Section(subQuestion.Heading, text, ContextBuilder.Sources(selected));
     }
@@ -263,8 +286,9 @@ public partial class Home
     /// <param name="query"> Search query </param>
     /// <param name="candidates"> Relevant search results </param>
     /// <param name="passageTokenBudget"> Maximum number of tokens our passages can use as context </param>
+    /// <param name="ct"> Cancellation token </param>
     /// <returns> List of relevant text passages </returns>
-    private async Task<List<ScoredPassage>> GatherPassagesAsync(string query, IReadOnlyList<SearchResult> candidates, int passageTokenBudget)
+    private async Task<List<ScoredPassage>> GatherPassagesAsync(string query, IReadOnlyList<SearchResult> candidates, int passageTokenBudget, CancellationToken ct)
     {
         List<ScoredPassage> relevantPassages = new();
         HashSet<string> seenTexts = new();
@@ -281,7 +305,7 @@ public partial class Home
             List<Task<IReadOnlyList<Passage>>> fetchTasks = new();
 
             foreach (SearchResult result in batch)
-                fetchTasks.Add(FetchPassagesAsync(result));
+                fetchTasks.Add(FetchPassagesAsync(result, ct));
             
             IReadOnlyList<Passage>[] pages = await Task.WhenAll(fetchTasks);            
             fetchedPageCount += batch.Count;
@@ -301,14 +325,14 @@ public partial class Home
             if (passages.Count > 0)
             {
                 // Score passages for relevance
-                float[] scores = await Reranker.ScoreAsync(query, passages.Select(passage => passage.Text));
+                float[] scores = await Reranker.ScoreAsync(query, passages.Select(passage => passage.Text), ct);
 
                 for (int i = 0; i < passages.Count; i++)
                 {
                     if (scores[i] < Reranker.PassageThreshold)
                         continue;
 
-                    int tokens = await Chat.CountTokensAsync(PromptHelper.Document(passages[i].Text));
+                    int tokens = await Chat.CountTokensAsync(PromptHelper.Document(passages[i].Text), ct);
                     relevantPassages.Add(new ScoredPassage(passages[i], scores[i], tokens));
                     relevantPassageTokens += tokens;
                 }
@@ -324,12 +348,13 @@ public partial class Home
     /// Gets a list of text passages from a single search result.
     /// </summary>
     /// <param name="result"> Single search result </param>
+    /// <param name="ct"> Cancellation token </param>
     /// <returns> List of text passages </returns>
-    private async Task<IReadOnlyList<Passage>> FetchPassagesAsync(SearchResult result)
+    private async Task<IReadOnlyList<Passage>> FetchPassagesAsync(SearchResult result, CancellationToken ct)
     {
         try
         {
-            string html = await Pages.ExtractAsync(result.Url);
+            string html = await Pages.ExtractAsync(result.Url, ct);
             return Chunker.Chunk(html, result.Title, result.Url);
         }
         catch (HttpRequestException)

@@ -116,6 +116,18 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
+        internal static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
+            }
+        }
+
+        internal static string RunCancelled {
+            get {
+                return ResourceManager.GetString("RunCancelled", resourceCulture);
+            }
+        }
+
         internal static string ExecutiveSummary {
             get {
                 return ResourceManager.GetString("ExecutiveSummary", resourceCulture);
