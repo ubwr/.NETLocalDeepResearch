@@ -146,6 +146,12 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
+        internal static string RunInProgress {
+            get {
+                return ResourceManager.GetString("RunInProgress", resourceCulture);
+            }
+        }
+
         internal static string ExecutiveSummary {
             get {
                 return ResourceManager.GetString("ExecutiveSummary", resourceCulture);

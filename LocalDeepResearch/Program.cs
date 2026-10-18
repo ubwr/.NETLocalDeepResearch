@@ -2,6 +2,7 @@ using LocalDeepResearch.Components;
 using LocalDeepResearch.Chat;
 using LocalDeepResearch.Extraction;
 using LocalDeepResearch.Reranking;
+using LocalDeepResearch.Research;
 using LocalDeepResearch.Search;
 using Microsoft.Extensions.Options;
 using MudBlazor.Services;
@@ -10,7 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents(options =>
+    {
+        options.DisconnectedCircuitRetentionPeriod = TimeSpan.Zero;
+    });
 
 builder.Services.AddMudServices();
 
@@ -21,6 +25,8 @@ builder.Services.AddSingleton<ChatClient>();
 builder.Services.Configure<RerankerOptions>(builder.Configuration.GetSection("Reranker"));
 
 builder.Services.AddSingleton<RerankerClient>();
+
+builder.Services.AddSingleton<ResearchLock>();
 
 builder.Services.Configure<SearxngOptions>(builder.Configuration.GetSection("Searxng"));
 

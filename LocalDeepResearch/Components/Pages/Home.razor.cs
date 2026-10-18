@@ -38,6 +38,7 @@ public partial class Home : IDisposable
     [Inject] private SearxngClient Searxng { get; set; }
     [Inject] private RerankerClient Reranker { get; set; }
     [Inject] private PageClient Pages { get; set; }
+    [Inject] private ResearchLock ResearchLock { get; set; }
 
     /// <summary>
     /// Prompt to the local LLM.
@@ -92,7 +93,7 @@ public partial class Home : IDisposable
     /// </summary>
     private double _pageThreshold;
     /// <summary>
-    /// Request cancellation message.
+    /// Information message.
     /// </summary>
     private string? _notice;
     /// <summary>
@@ -158,6 +159,14 @@ public partial class Home : IDisposable
     {
         if (_busy || string.IsNullOrWhiteSpace(_prompt))
             return;
+
+        // Try to claim the research lock
+        if (!ResearchLock.TryAcquire())
+        {
+            _error = null;
+            _notice = Strings.RunInProgress;
+            return;
+        }
 
         _busy = true;
         _error = null;
@@ -233,6 +242,7 @@ public partial class Home : IDisposable
         {
             _cancellation.Dispose();
             _cancellation = null;
+            ResearchLock.Release();
             _busy = false;
         }
     }

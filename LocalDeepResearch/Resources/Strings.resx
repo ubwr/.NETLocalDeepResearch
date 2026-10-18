@@ -109,6 +109,9 @@
   <data name="SectionSkipped" xml:space="preserve">
     <value>Skipped "{0}": not enough sources</value>
   </data>
+  <data name="RunInProgress" xml:space="preserve">
+    <value>Another research run is already in progress.</value>
+  </data>
   <data name="ExecutiveSummary" xml:space="preserve">
     <value>Executive Summary</value>
   </data>
