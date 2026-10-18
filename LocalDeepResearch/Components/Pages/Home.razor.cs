@@ -299,7 +299,7 @@ public partial class Home : IDisposable
 
             // Get relevant sources via filtering with index
             relevantResults = Enumerable.Range(0, _results.Count)
-                .Where(i => _scores[i] >= _pageThreshold)
+                .Where(i => Helpers.ToPercent(_scores[i]) >= Helpers.ToPercent(_pageThreshold))
                 .OrderByDescending(i => _scores[i])
                 .Select(i => _results[i])
                 .ToList();

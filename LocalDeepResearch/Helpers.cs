@@ -33,4 +33,13 @@ public static class Helpers
 
         return text.Substring(0, maxLength) + "...";
     }
+    /// <summary>
+    /// Converts a double to a percentage.
+    /// </summary>
+    /// <param name="value"> Value between 0 and 1 </param>
+    /// <returns> Percentage </returns>
+    public static int ToPercent(double value)
+    {
+        return (int)Math.Round(value * 100, MidpointRounding.AwayFromZero);
+    }
 }

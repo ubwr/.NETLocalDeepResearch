@@ -149,7 +149,7 @@
                         <MudLink Href="@result.Url" Target="_blank" rel="noopener noreferrer" Typo="Typo.body2">@Helpers.Truncate(result.Title, MaxSourceLengthChars)</MudLink>
                         <MudText Typo="Typo.caption">@result.Engine</MudText>
                         <MudSpacer />
-                        <MudText Typo="Typo.caption" Color="@(score >= _pageThreshold ? Color.Success : Color.Error)">@score.ToString("P0")</MudText>
+                        <MudText Typo="Typo.caption" Color="@(Helpers.ToPercent(score) >= Helpers.ToPercent(_pageThreshold) ? Color.Success : Color.Error)">@score.ToString("P0")</MudText>
                     </MudStack>
                 }
             </MudStack>
