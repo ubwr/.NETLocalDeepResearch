@@ -101,6 +101,10 @@ public partial class Home : IDisposable
     /// </summary>
     private List<string> _skippedSections = new();
     /// <summary>
+    /// List of research sections that received errors during search.
+    /// </summary>
+    private List<string> _failedSections = new();
+    /// <summary>
     /// Summary of our research report.
     /// </summary>
     private string? _summary;
@@ -179,6 +183,7 @@ public partial class Home : IDisposable
         _plan = null;
         _summary = null;
         _skippedSections = new();
+        _failedSections = new();
         _cancellation = new CancellationTokenSource();
         CancellationToken ct = _cancellation.Token;
 
@@ -272,7 +277,16 @@ public partial class Home : IDisposable
         int fixedTokens = await Chat.CountPromptTokensAsync(PromptHelper.SystemMessage, PromptHelper.SectionRequest(question, otherHeadings), ct);
         int passageTokenBudget = Chat.PromptTokenBudget - fixedTokens;
 
-        _results = await Searxng.SearchAsync(question, ct);
+        try
+        {
+            _results = await Searxng.SearchAsync(question, ct);
+        }
+        catch (HttpRequestException)
+        {
+            _failedSections.Add(subQuestion.Heading);
+            return null;
+        }
+
         StateHasChanged();
 
         List<SearchResult> relevantResults = [];

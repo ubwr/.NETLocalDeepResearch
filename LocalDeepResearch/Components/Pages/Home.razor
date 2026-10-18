@@ -121,12 +121,16 @@
         </MudPaper>
     }
 
-    @if (_skippedSections.Count > 0)
+    @if (_skippedSections.Count > 0 || _failedSections.Count > 0)
     {
         <MudStack Spacing="1">
             @foreach (string heading in _skippedSections)
             {
                 <MudText Typo="Typo.caption" Color="Color.Warning">@string.Format(Strings.SectionSkipped, heading)</MudText>
+            }
+            @foreach (string heading in _failedSections)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Error">@string.Format(Strings.SectionFailed, heading)</MudText>
             }
         </MudStack>
     }

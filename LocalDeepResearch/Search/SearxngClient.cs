@@ -28,6 +28,7 @@ public class SearxngClient
     /// <param name="query"> Search query </param>
     /// <param name="ct"> Cancellation token </param>
     /// <returns> List of <see cref="SearchResult"/> objects that we get back from API </returns>
+    /// <exception cref="HttpRequestException"> Error during search </exception>
     public async Task<IReadOnlyList<SearchResult>> SearchAsync(string query, CancellationToken ct = default)
     {
         List<SearchResult> results = new();
@@ -44,7 +45,20 @@ public class SearxngClient
                 ["pageno"] = page.ToString()
             });
 
-            SearchResponse? response = await _http.GetFromJsonAsync<SearchResponse>(url, Json, ct);
+            SearchResponse? response;
+
+            try
+            {
+                response = await _http.GetFromJsonAsync<SearchResponse>(url, Json, ct);
+            }
+            catch (TaskCanceledException ex) when (!ct.IsCancellationRequested)
+            {
+                throw new HttpRequestException($"Timed out searching for {query}", ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new HttpRequestException($"Invalid search response for {query}", ex);
+            }
 
             if (response is null || response.Results.Count == 0)
                 break;

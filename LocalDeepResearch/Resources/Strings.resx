@@ -112,6 +112,9 @@
   <data name="RunInProgress" xml:space="preserve">
     <value>Another research run is already in progress.</value>
   </data>
+  <data name="SectionFailed" xml:space="preserve">
+    <value>Skipped "{0}": search failed</value>
+  </data>
   <data name="ExecutiveSummary" xml:space="preserve">
     <value>Executive Summary</value>
   </data>

@@ -152,6 +152,12 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
+        internal static string SectionFailed {
+            get {
+                return ResourceManager.GetString("SectionFailed", resourceCulture);
+            }
+        }
+
         internal static string ExecutiveSummary {
             get {
                 return ResourceManager.GetString("ExecutiveSummary", resourceCulture);
