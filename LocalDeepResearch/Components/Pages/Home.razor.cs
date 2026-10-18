@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace LocalDeepResearch.Components.Pages;
 
-public partial class Home
+public partial class Home : IDisposable
 {
     /// <summary>
     /// How many pages to fetch at once.
@@ -242,6 +242,10 @@ public partial class Home
     private void CancelRun()
     {
         _cancellation?.Cancel();
+    }
+    public void Dispose()
+    {
+        CancelRun();
     }
     /// <summary>
     /// Sends a research question to our local LLM for a single section.
