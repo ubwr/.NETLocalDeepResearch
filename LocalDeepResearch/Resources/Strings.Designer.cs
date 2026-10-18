@@ -86,18 +86,6 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
-        internal static string StatusGathering {
-            get {
-                return ResourceManager.GetString("StatusGathering", resourceCulture);
-            }
-        }
-
-        internal static string StatusSelected {
-            get {
-                return ResourceManager.GetString("StatusSelected", resourceCulture);
-            }
-        }
-
         internal static string NotEnoughSites {
             get {
                 return ResourceManager.GetString("NotEnoughSites", resourceCulture);
@@ -125,6 +113,36 @@ namespace LocalDeepResearch.Resources {
         internal static string RunCancelled {
             get {
                 return ResourceManager.GetString("RunCancelled", resourceCulture);
+            }
+        }
+
+        internal static string StatusPlanning {
+            get {
+                return ResourceManager.GetString("StatusPlanning", resourceCulture);
+            }
+        }
+
+        internal static string StatusResearching {
+            get {
+                return ResourceManager.GetString("StatusResearching", resourceCulture);
+            }
+        }
+
+        internal static string StatusWriting {
+            get {
+                return ResourceManager.GetString("StatusWriting", resourceCulture);
+            }
+        }
+
+        internal static string StatusSummary {
+            get {
+                return ResourceManager.GetString("StatusSummary", resourceCulture);
+            }
+        }
+
+        internal static string SectionSkipped {
+            get {
+                return ResourceManager.GetString("SectionSkipped", resourceCulture);
             }
         }
 

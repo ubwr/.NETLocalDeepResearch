@@ -17,15 +17,14 @@
                   OnKeyDown="OnKeyDown"
                   FullWidth />
 
-    @if (!_busy)
+    @if (!_busy && !_loadingModel)
     {
         <MudSlider T="double"
                    @bind-Value="_pageThreshold"
                    Min="0"
                    Max="1"
                    Step="0.1"
-                   ValueLabel
-                   Disabled="_loadingModel">@string.Format(Strings.PageThreshold, _pageThreshold)</MudSlider>
+                   ValueLabel>@string.Format(Strings.PageThreshold, _pageThreshold)</MudSlider>
     }
 
     @if (_loadingModel)
@@ -120,6 +119,16 @@
                 </MudStack>
             }
         </MudPaper>
+    }
+
+    @if (_skippedSections.Count > 0)
+    {
+        <MudStack Spacing="1">
+            @foreach (string heading in _skippedSections)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Warning">@string.Format(Strings.SectionSkipped, heading)</MudText>
+            }
+        </MudStack>
     }
 
     @if (_results.Count > 0 && _scores.Length == _results.Count)

@@ -79,12 +79,6 @@
   <data name="TokenCount" xml:space="preserve">
     <value>{0} tokens</value>
   </data>
-  <data name="StatusGathering" xml:space="preserve">
-    <value>Reading sources: {0} of {1} pages, {2} relevant passages</value>
-  </data>
-  <data name="StatusSelected" xml:space="preserve">
-    <value>Selected {0} of {1} passages</value>
-  </data>
   <data name="NotEnoughSites" xml:space="preserve">
     <value>Not enough relevant sites were found to answer this question.</value>
   </data>
@@ -99,6 +93,21 @@
   </data>
   <data name="RunCancelled" xml:space="preserve">
     <value>Research cancelled.</value>
+  </data>
+  <data name="StatusPlanning" xml:space="preserve">
+    <value>Planning research</value>
+  </data>
+  <data name="StatusResearching" xml:space="preserve">
+    <value>Researching "{0}"</value>
+  </data>
+  <data name="StatusWriting" xml:space="preserve">
+    <value>Writing "{0}"</value>
+  </data>
+  <data name="StatusSummary" xml:space="preserve">
+    <value>Writing executive summary</value>
+  </data>
+  <data name="SectionSkipped" xml:space="preserve">
+    <value>Skipped "{0}": not enough sources</value>
   </data>
   <data name="ExecutiveSummary" xml:space="preserve">
     <value>Executive Summary</value>

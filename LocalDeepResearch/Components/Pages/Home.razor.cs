@@ -28,7 +28,7 @@ public partial class Home
     /// <summary>
     /// Maximum text length in chars a single source can be.
     /// </summary>
-    private const int MaxSourceLengthChars = 50;
+    private const int MaxSourceLengthChars = 100;
 
     private static readonly JsonSerializerOptions ModelJson = new(JsonSerializerDefaults.Web);
     
@@ -95,6 +95,10 @@ public partial class Home
     /// Request cancellation message.
     /// </summary>
     private string? _notice;
+    /// <summary>
+    /// List of skipped research sections.
+    /// </summary>
+    private List<string> _skippedSections = new();
     /// <summary>
     /// Summary of our research report.
     /// </summary>
@@ -165,12 +169,16 @@ public partial class Home
         _runStatus = null;
         _plan = null;
         _summary = null;
+        _skippedSections = new();
         _cancellation = new CancellationTokenSource();
         CancellationToken ct = _cancellation.Token;
 
         try
         {
             string query = _prompt.Trim();
+
+            _runStatus = Strings.StatusPlanning;
+            StateHasChanged();
 
             // Get our list of subquestions
             string planJson = await Chat.AskAsync(PromptHelper.PlannerSystemMessage, query, PromptHelper.PlanSchema, ct);
@@ -183,6 +191,9 @@ public partial class Home
 
             foreach (SubQuestion subQuestion in subQuestions)
             {
+                _runStatus = string.Format(Strings.StatusResearching, subQuestion.Heading);
+                StateHasChanged();
+
                 List<string> otherHeadings = subQuestions
                     .Where(other => other != subQuestion)
                     .Select(other => other.Heading)
@@ -202,6 +213,9 @@ public partial class Home
                 _error = Strings.NotEnoughSites;
                 return;
             }
+
+            _runStatus = Strings.StatusSummary;
+            StateHasChanged();
 
             string reportSummaryMessage = PromptHelper.ReportSummaryMessage(_sections, _plan.Title);
 
@@ -269,10 +283,13 @@ public partial class Home
         List<ScoredPassage> relevantPassages = await GatherPassagesAsync(question, relevantResults, passageTokenBudget, ct);
 
         if (ContextBuilder.CountSites(relevantPassages) < MinSites)
+        {
+            _skippedSections.Add(subQuestion.Heading);
             return null;
+        }
 
         IReadOnlyList<ScoredPassage> selected = ContextBuilder.Select(relevantPassages, passageTokenBudget);
-        _runStatus = string.Format(Strings.StatusSelected, selected.Count, relevantPassages.Count);
+        _runStatus = string.Format(Strings.StatusWriting, subQuestion.Heading);
         StateHasChanged();
 
         string userMessage = PromptHelper.UserMessage(selected, question, otherHeadings);
@@ -337,9 +354,6 @@ public partial class Home
                     relevantPassageTokens += tokens;
                 }
             }
-
-            _runStatus = string.Format(Strings.StatusGathering, fetchedPageCount, candidates.Count, relevantPassages.Count);
-            StateHasChanged();
         }
 
         return relevantPassages;

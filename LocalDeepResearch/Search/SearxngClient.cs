@@ -53,7 +53,7 @@ public class SearxngClient
         }
 
         return results
-            .Where(result => !string.IsNullOrWhiteSpace(result.Url))
+            .Where(result => !string.IsNullOrWhiteSpace(result.Url) && !string.IsNullOrWhiteSpace(result.Title))
             .DistinctBy(result => result.Url)
             .Take(_options.MaxResults)
             .ToList();
