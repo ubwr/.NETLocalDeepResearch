@@ -2,12 +2,14 @@ using System.Text.Json;
 using LMSupply;
 using LocalDeepResearch.Resources;
 using LocalDeepResearch.Chat;
+using LocalDeepResearch.Export;
 using LocalDeepResearch.Extraction;
 using LocalDeepResearch.Reranking;
 using LocalDeepResearch.Research;
 using LocalDeepResearch.Search;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 
 namespace LocalDeepResearch.Components.Pages;
 
@@ -39,6 +41,7 @@ public partial class Home : IDisposable
     [Inject] private RerankerClient Reranker { get; set; }
     [Inject] private PageClient Pages { get; set; }
     [Inject] private ResearchLock ResearchLock { get; set; }
+    [Inject] private IJSRuntime JS { get; set; }
 
     /// <summary>
     /// Prompt to the local LLM.
@@ -250,6 +253,21 @@ public partial class Home : IDisposable
             ResearchLock.Release();
             _busy = false;
         }
+    }
+    /// <summary>
+    /// Downloads the completed research report PDF.
+    /// </summary>
+    private async Task DownloadPdfAsync()
+    {
+        if (_plan is null || _summary is null)
+            return;
+
+        byte[] pdf = ReportPdf.Create(_plan.Title, _summary, _sections);
+
+        using var stream = new MemoryStream(pdf);
+        using var streamReference = new DotNetStreamReference(stream);
+
+        await JS.InvokeVoidAsync("downloadFileFromStream", $"{_plan.Title}.pdf", streamReference);
     }
     /// <summary>
     /// Cancels the user's research request.

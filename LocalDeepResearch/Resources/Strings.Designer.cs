@@ -158,6 +158,12 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
+        internal static string DownloadPdf {
+            get {
+                return ResourceManager.GetString("DownloadPdf", resourceCulture);
+            }
+        }
+
         internal static string ExecutiveSummary {
             get {
                 return ResourceManager.GetString("ExecutiveSummary", resourceCulture);

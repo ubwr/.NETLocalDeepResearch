@@ -6,6 +6,9 @@ using LocalDeepResearch.Research;
 using LocalDeepResearch.Search;
 using Microsoft.Extensions.Options;
 using MudBlazor.Services;
+using QuestPDF.Infrastructure;
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 

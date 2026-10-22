@@ -19,6 +19,7 @@
       <PackageReference Include="LMSupply.Generator" Version="0.115.1" />
       <PackageReference Include="LMSupply.Reranker" Version="0.115.1" />
       <PackageReference Include="MudBlazor" Version="9.10.0" />
+      <PackageReference Include="QuestPDF" Version="2026.9.1" />
       <PackageReference Include="Trafilatura" Version="0.3.7" />
     </ItemGroup>
 

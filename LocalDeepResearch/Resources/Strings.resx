@@ -115,6 +115,9 @@
   <data name="SectionFailed" xml:space="preserve">
     <value>Skipped "{0}": search failed</value>
   </data>
+  <data name="DownloadPdf" xml:space="preserve">
+    <value>Download PDF</value>
+  </data>
   <data name="ExecutiveSummary" xml:space="preserve">
     <value>Executive Summary</value>
   </data>

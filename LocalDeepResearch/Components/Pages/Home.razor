@@ -78,6 +78,16 @@
     @if (_sections.Count > 0)
     {
         <MudPaper Class="pa-4" Elevation="0" Outlined>
+            @if (_summary is not null && !_busy)
+            {
+                <div class="d-flex justify-end">
+                    <MudButton Variant="Variant.Outlined"
+                               Size="Size.Small"
+                               StartIcon="@Icons.Material.Outlined.Download"
+                               OnClick="DownloadPdfAsync">@Strings.DownloadPdf</MudButton>
+                </div>
+            }
+
             @if (_plan is not null)
             {
                 <MudText Typo="Typo.h5" Class="mb-4">@_plan.Title</MudText>
