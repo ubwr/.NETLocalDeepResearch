@@ -36,3 +36,10 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.report-heading {
+    color: #4FD1C5;
+    font-weight: 700;
+    font-style: italic;
+    text-transform: uppercase;
+}

@@ -56,13 +56,22 @@
 
     @if (Chat.IsModelLoaded)
     {
-        <MudChip T="string"
-                 Size="Size.Small"
-                 Variant="Variant.Outlined"
-                 Class="align-self-start"
-                 Color="@(Chat.IsGpuActive ? Color.Success : Color.Warning)">
-            @(Chat.IsGpuActive ? "GPU" : "CPU")
-        </MudChip>
+        <MudStack Row AlignItems="AlignItems.Center">
+            <MudChip T="string"
+                     Size="Size.Small"
+                     Variant="Variant.Outlined"
+                     Color="@(Chat.IsGpuActive ? Color.Success : Color.Warning)">
+                @(Chat.IsGpuActive ? "GPU" : "CPU")
+            </MudChip>
+            <MudSpacer />
+            @if (_summary is not null && !_busy)
+            {
+                <MudButton Variant="Variant.Outlined"
+                           Size="Size.Small"
+                           StartIcon="@Icons.Material.Outlined.Download"
+                           OnClick="DownloadPdfAsync">@Strings.DownloadPdf</MudButton>
+            }
+        </MudStack>
     }
 
     @if (_error is not null)
@@ -77,36 +86,26 @@
 
     @if (_sections.Count > 0)
     {
-        <MudPaper Class="pa-4" Elevation="0" Outlined>
-            @if (_summary is not null && !_busy)
-            {
-                <div class="d-flex justify-end">
-                    <MudButton Variant="Variant.Outlined"
-                               Size="Size.Small"
-                               StartIcon="@Icons.Material.Outlined.Download"
-                               OnClick="DownloadPdfAsync">@Strings.DownloadPdf</MudButton>
-                </div>
-            }
-
+        <MudPaper Class="pa-8" Elevation="0" Outlined>
             @if (_plan is not null)
             {
-                <MudText Typo="Typo.h5" Class="mb-4">@_plan.Title</MudText>
+                <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-4" Style="font-weight: 700;">@_plan.Title</MudText>
             }
 
             @if (_summary is not null)
             {
-                <MudText Typo="Typo.h6">@Strings.ExecutiveSummary</MudText>
-                <MudText Typo="Typo.body1" Class="mt-2 mb-6" Style="white-space: pre-wrap;">@_summary</MudText>
+                <MudText Typo="Typo.subtitle1" Class="report-heading">@Strings.ExecutiveSummary</MudText>
+                <MudText Typo="Typo.body2" Class="mt-2 mb-6" Style="white-space: pre-wrap;">@_summary</MudText>
             }
 
             @foreach (Section section in _sections)
             {
-                <MudText Typo="Typo.h6">@section.Heading</MudText>
-                <MudText Typo="Typo.body1" Class="mt-2" Style="white-space: pre-wrap;">@section.Text</MudText>
+                <MudText Typo="Typo.subtitle1" Class="report-heading">@section.Heading</MudText>
+                <MudText Typo="Typo.body2" Class="mt-2" Style="white-space: pre-wrap;">@section.Text</MudText>
 
-                <MudExpansionPanels Elevation="0" Outlined Dense Class="mt-2 mb-6">
+                <MudExpansionPanels Elevation="0" Outlined Dense Class="mt-4 mb-6 border border-solid mud-border-lines-default rounded">
                     <MudExpansionPanel Text="@Strings.Sources">
-                        <MudStack Spacing="1" AlignItems="AlignItems.Start">
+                        <MudStack Spacing="1" AlignItems="AlignItems.Start" Class="pb-3">
                             @foreach (Source source in section.Sources)
                             {
                                 <MudLink Href="@source.Url" Target="_blank" rel="noopener noreferrer" Typo="Typo.body2">@Helpers.Truncate(source.Title, MaxSourceLengthChars)</MudLink>
