@@ -1,5 +1,4 @@
 @page "/"
-@rendermode InteractiveServer
 @using LocalDeepResearch.Research
 @using LocalDeepResearch.Search
 
@@ -17,14 +16,47 @@
                   OnKeyDown="OnKeyDown"
                   FullWidth />
 
-    @if (!_busy && !_loadingModel)
+    @if (!_busy && !_loadingModel && Chat.IsModelLoaded && Reranker.IsModelLoaded)
     {
         <MudSlider T="double"
                    @bind-Value="_pageThreshold"
                    Min="0"
                    Max="1"
-                   Step="0.1"
-                   ValueLabel>@string.Format(Strings.PageThreshold, _pageThreshold)</MudSlider>
+                   Step="0.05"
+                   ValueLabel>
+            <span class="d-inline-flex align-center gap-1">
+                @string.Format(Strings.PageThreshold, _pageThreshold)
+                <MudTooltip Text="@Strings.PageThresholdTooltip">
+                    <MudIcon Icon="@Icons.Material.Outlined.Info" Size="Size.Small" Class="d-block" />
+                </MudTooltip>
+            </span>
+        </MudSlider>
+        <MudSlider T="double"
+                   @bind-Value="_passageThreshold"
+                   Min="0"
+                   Max="1"
+                   Step="0.05"
+                   ValueLabel>
+            <span class="d-inline-flex align-center gap-1">
+                @string.Format(Strings.PassageThreshold, _passageThreshold)
+                <MudTooltip Text="@Strings.PassageThresholdTooltip">
+                    <MudIcon Icon="@Icons.Material.Outlined.Info" Size="Size.Small" Class="d-block" />
+                </MudTooltip>
+            </span>
+        </MudSlider>
+        <MudSlider T="int"
+                   @bind-Value="_minSites"
+                   Min="1"
+                   Max="5"
+                   Step="1"
+                   ValueLabel>
+            <span class="d-inline-flex align-center gap-1">
+                @string.Format(Strings.MinSites, _minSites)
+                <MudTooltip Text="@Strings.MinSitesTooltip">
+                    <MudIcon Icon="@Icons.Material.Outlined.Info" Size="Size.Small" Class="d-block" />
+                </MudTooltip>
+            </span>
+        </MudSlider>
     }
 
     @if (_loadingModel)

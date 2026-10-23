@@ -26,7 +26,7 @@ public partial class Home : IDisposable
     /// <summary>
     /// Minimum number of unique sites required for a search query to be valid.
     /// </summary>
-    private const int MinSites = 2;
+    private int _minSites = 2;
     /// <summary>
     /// Maximum text length in chars a single source can be.
     /// </summary>
@@ -96,6 +96,10 @@ public partial class Home : IDisposable
     /// </summary>
     private double _pageThreshold;
     /// <summary>
+    /// Minimum relevance score (0 to 1) a text passage needs for it to be used as context.
+    /// </summary>
+    private double _passageThreshold;
+    /// <summary>
     /// Information message.
     /// </summary>
     private string? _notice;
@@ -115,6 +119,7 @@ public partial class Home : IDisposable
     protected override void OnInitialized()
     {
         _pageThreshold = Reranker.PageThreshold;
+        _passageThreshold = Reranker.PassageThreshold;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -328,7 +333,7 @@ public partial class Home : IDisposable
 
         List<ScoredPassage> relevantPassages = await GatherPassagesAsync(question, relevantResults, passageTokenBudget, ct);
 
-        if (ContextBuilder.CountSites(relevantPassages) < MinSites)
+        if (ContextBuilder.CountSites(relevantPassages) < _minSites)
         {
             _skippedSections.Add(subQuestion.Heading);
             return null;
@@ -392,7 +397,7 @@ public partial class Home : IDisposable
 
                 for (int i = 0; i < passages.Count; i++)
                 {
-                    if (scores[i] < Reranker.PassageThreshold)
+                    if (scores[i] < _passageThreshold)
                         continue;
 
                     int tokens = await Chat.CountTokensAsync(PromptHelper.Document(passages[i].Text), ct);

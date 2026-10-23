@@ -164,6 +164,36 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
+        internal static string PassageThreshold {
+            get {
+                return ResourceManager.GetString("PassageThreshold", resourceCulture);
+            }
+        }
+
+        internal static string MinSites {
+            get {
+                return ResourceManager.GetString("MinSites", resourceCulture);
+            }
+        }
+
+        internal static string PageThresholdTooltip {
+            get {
+                return ResourceManager.GetString("PageThresholdTooltip", resourceCulture);
+            }
+        }
+
+        internal static string PassageThresholdTooltip {
+            get {
+                return ResourceManager.GetString("PassageThresholdTooltip", resourceCulture);
+            }
+        }
+
+        internal static string MinSitesTooltip {
+            get {
+                return ResourceManager.GetString("MinSitesTooltip", resourceCulture);
+            }
+        }
+
         internal static string ExecutiveSummary {
             get {
                 return ResourceManager.GetString("ExecutiveSummary", resourceCulture);

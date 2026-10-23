@@ -86,7 +86,7 @@
     <value>Sources</value>
   </data>
   <data name="PageThreshold" xml:space="preserve">
-    <value>Page relevance threshold: {0:0.0}</value>
+    <value>Page relevance threshold: {0:0.00}</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
@@ -117,6 +117,21 @@
   </data>
   <data name="DownloadPdf" xml:space="preserve">
     <value>Download PDF</value>
+  </data>
+  <data name="PassageThreshold" xml:space="preserve">
+    <value>Passage relevance threshold: {0:0.00}</value>
+  </data>
+  <data name="MinSites" xml:space="preserve">
+    <value>Minimum sites per section: {0}</value>
+  </data>
+  <data name="PageThresholdTooltip" xml:space="preserve">
+    <value>How relevant a search result must be for its page to be fetched</value>
+  </data>
+  <data name="PassageThresholdTooltip" xml:space="preserve">
+    <value>How relevant a text passage must be for it to be used as context for a section</value>
+  </data>
+  <data name="MinSitesTooltip" xml:space="preserve">
+    <value>How many different websites a section requires before it can be written</value>
   </data>
   <data name="ExecutiveSummary" xml:space="preserve">
     <value>Executive Summary</value>
