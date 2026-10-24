@@ -1,5 +1,6 @@
 using System.Text.Json;
 using LMSupply;
+using LMSupply.Generator.Gguf;
 using LocalDeepResearch.Resources;
 using LocalDeepResearch.Chat;
 using LocalDeepResearch.Export;
@@ -32,9 +33,26 @@ public partial class Home : IDisposable
     /// </summary>
     private int _sectionCount = 4;
     /// <summary>
+    /// Selected item from the model dropdown.
+    /// </summary>
+    private string _selectedModel = string.Empty;
+    /// <summary>
+    /// Id of the custom model.
+    /// </summary>
+    private string _customModelId = string.Empty;
+    /// <summary>
     /// Maximum text length in chars a single source can be.
     /// </summary>
     private const int MaxSourceLengthChars = 100;
+    
+    private const string CustomModelOption = "custom";
+
+    /// <summary>
+    /// List of default models included by LMSupply.
+    /// </summary>
+    private static readonly IReadOnlyList<GgufModelInfo> Models = GgufModelRegistry.GetAllModels()
+        .DistinctBy(model => model.RepoId)
+        .ToList();
 
     private static readonly JsonSerializerOptions ModelJson = new(JsonSerializerDefaults.Web);
     
@@ -124,6 +142,18 @@ public partial class Home : IDisposable
     {
         _pageThreshold = Reranker.PageThreshold;
         _passageThreshold = Reranker.PassageThreshold;
+
+        // If our currently loaded model exists in the dropdown, then set that as the selected item
+        if (Models.Any(model => model.RepoId == Chat.ModelId))
+        {
+            _selectedModel = Chat.ModelId;
+        }
+        // Custom model selected
+        else
+        {
+            _selectedModel = CustomModelOption;
+            _customModelId = Chat.ModelId;
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -132,6 +162,15 @@ public partial class Home : IDisposable
         if (!firstRender || (Chat.IsModelLoaded && Reranker.IsModelLoaded))
             return;
 
+        // Load our default model immediately
+        await LoadModelsAsync(Chat.ModelId);
+    }
+    /// <summary>
+    /// Downloads a model for text generation and a model for reranking.
+    /// </summary>
+    /// <param name="modelId"> Id of the model to download </param>
+    private async Task LoadModelsAsync(string modelId)
+    {
         _loadingModel = true;
         _loadingStatus = Strings.ModelPreparing;
         StateHasChanged();
@@ -145,7 +184,7 @@ public partial class Home : IDisposable
 
         try
         {
-            await Chat.LoadAsync(Chat.ModelId, progress);
+            await Chat.LoadAsync(modelId, progress);
             await Reranker.LoadAsync(progress);
         }
         catch (Exception ex)
@@ -278,6 +317,52 @@ public partial class Home : IDisposable
         using var streamReference = new DotNetStreamReference(stream);
 
         await JS.InvokeVoidAsync("downloadFileFromStream", $"{_plan.Title}.pdf", streamReference);
+    }
+    /// <summary>
+    /// Selects a new model to use for generation.
+    /// </summary>
+    /// <param name="value"> New model Id </param>
+    private async Task SelectModelAsync(string value)
+    {
+        _selectedModel = value;
+
+        if (value != CustomModelOption)
+            await SwitchModelAsync(value);
+    }
+    /// <summary>
+    /// Switches the local model used for generation. 
+    /// </summary>
+    /// <param name="modelId"> Id of new model to use </param>
+    private async Task SwitchModelAsync(string modelId)
+    {
+        if (string.IsNullOrWhiteSpace(modelId))
+            return;
+        
+        if (Chat.IsModelLoaded && modelId.Trim() == Chat.ModelId)
+            return;
+
+        // Don't load new models when a run is active
+        if (!ResearchLock.TryAcquire())
+        {
+            _notice = Strings.RunInProgress;
+            return;
+        }
+
+        string previousModelId = Chat.ModelId;
+
+        try
+        {
+            _error = null;
+            await LoadModelsAsync(modelId.Trim());
+
+            // Fallback to previously selected model if new one fails to download
+            if (!Chat.IsModelLoaded)
+                await LoadModelsAsync(previousModelId);
+        }
+        finally
+        {
+            ResearchLock.Release();
+        }
     }
     /// <summary>
     /// Cancels the user's research request.

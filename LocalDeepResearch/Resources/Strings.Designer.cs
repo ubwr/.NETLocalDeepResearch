@@ -212,6 +212,30 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
+        internal static string Model {
+            get {
+                return ResourceManager.GetString("Model", resourceCulture);
+            }
+        }
+
+        internal static string CustomModel {
+            get {
+                return ResourceManager.GetString("CustomModel", resourceCulture);
+            }
+        }
+
+        internal static string CustomModelPlaceholder {
+            get {
+                return ResourceManager.GetString("CustomModelPlaceholder", resourceCulture);
+            }
+        }
+
+        internal static string LoadModel {
+            get {
+                return ResourceManager.GetString("LoadModel", resourceCulture);
+            }
+        }
+
         internal static string ExecutiveSummary {
             get {
                 return ResourceManager.GetString("ExecutiveSummary", resourceCulture);

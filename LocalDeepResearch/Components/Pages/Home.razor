@@ -1,4 +1,5 @@
 @page "/"
+@using LMSupply.Generator.Gguf
 @using LocalDeepResearch.Research
 @using LocalDeepResearch.Search
 
@@ -18,6 +19,31 @@
 
     @if (!_busy && !_loadingModel && Chat.IsModelLoaded && Reranker.IsModelLoaded)
     {
+        <MudSelect T="string"
+                   Value="@_selectedModel"
+                   ValueChanged="SelectModelAsync"
+                   Label="@Strings.Model"
+                   Variant="Variant.Outlined"
+                   Dense>
+            @foreach (GgufModelInfo model in Models)
+            {
+                <MudSelectItem Value="@model.RepoId">@model.DisplayName</MudSelectItem>
+            }
+            <MudSelectItem Value="@CustomModelOption">@Strings.CustomModel</MudSelectItem>
+        </MudSelect>
+
+        @if (_selectedModel == CustomModelOption)
+        {
+            <MudStack Row AlignItems="AlignItems.Center">
+                <MudTextField @bind-Value="_customModelId"
+                              Placeholder="@Strings.CustomModelPlaceholder"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense" />
+                <MudButton Variant="Variant.Outlined"
+                           OnClick="() => SwitchModelAsync(_customModelId)">@Strings.LoadModel</MudButton>
+            </MudStack>
+        }
+
         <MudSlider T="double"
                    @bind-Value="_pageThreshold"
                    Min="0"
