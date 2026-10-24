@@ -28,6 +28,10 @@ public partial class Home : IDisposable
     /// </summary>
     private int _minSites = 2;
     /// <summary>
+    /// Number of additional text sections to include in output after historical context.
+    /// </summary>
+    private int _sectionCount = 4;
+    /// <summary>
     /// Maximum text length in chars a single source can be.
     /// </summary>
     private const int MaxSourceLengthChars = 100;
@@ -204,7 +208,7 @@ public partial class Home : IDisposable
             StateHasChanged();
 
             // Get our list of subquestions
-            string planJson = await Chat.AskAsync(PromptHelper.PlannerSystemMessage, query, PromptHelper.PlanSchema, ct);
+            string planJson = await Chat.AskAsync(PromptHelper.PlannerSystemMessage(_sectionCount), query, PromptHelper.PlanSchema(_sectionCount), ct);
             _plan = JsonSerializer.Deserialize<ResearchPlan>(planJson, ModelJson)
                 ?? throw new InvalidOperationException("Failed to create a research plan.");
             StateHasChanged();

@@ -24,20 +24,26 @@ public static class PromptHelper
     /// <summary>
     /// Custom system message to include when we need to generate a research plan.
     /// </summary>
-    public const string PlannerSystemMessage =
-        "You are a research planner. " +
-        "Write a short title for the report. " +
-        "Write one subquestion about the history of the topic. " +
-        "Then break the user's research question into 3 to 5 subquestions that together fully answer it, " +
-        "ordered so a report built from them reads naturally, from background to specifics. " +
-        "Do not include any subquestions about history, since history is handled separately. " +
-        "For each subquestion, give a short section heading and a short, concise, self-contained question. " +
-        "Do not include a summary or introduction.";
+    /// <param name="sectionCount"> Number of additional text sections to include in output after historical context </param>
+    public static string PlannerSystemMessage(int sectionCount)
+    {
+        return "You are a research planner. " +
+            "Write a short title for the report. " +
+            "Write one subquestion about the history of the topic. " +
+            $"Then break the user's research question into exactly {sectionCount} subquestions that together fully answer it, " +
+            "ordered so a report built from them reads naturally, from background to specifics. " +
+            "Do not include any subquestions about history, since history is handled separately. " +
+            "For each subquestion, give a short section heading and a short, concise, self-contained question. " +
+            "Do not include a summary or introduction.";
+    }
 
     /// <summary>
     /// JSON schema to use for our research plan.
     /// </summary>
-    public const string PlanSchema = """
+    /// <param name="sectionCount"> Number of additional text sections to include in output after historical context </param>
+    public static string PlanSchema(int sectionCount)
+    {
+        return $$"""
         {
           "type": "object",
           "properties": {
@@ -53,8 +59,8 @@ public static class PromptHelper
             },
             "subQuestions": {
               "type": "array",
-              "minItems": 3,
-              "maxItems": 5,
+              "minItems": {{sectionCount}},
+              "maxItems": {{sectionCount}},
               "items": {
                 "type": "object",
                 "properties": {
@@ -70,6 +76,7 @@ public static class PromptHelper
           "additionalProperties": false
         }
         """;
+    }
 
     /// <summary>
     /// Custom system message to include when we need to generate a report summary.

@@ -136,6 +136,12 @@
   <data name="TokensPerSecond" xml:space="preserve">
     <value>{0:F1} tok/s</value>
   </data>
+  <data name="AdditionalSections" xml:space="preserve">
+    <value>Additional sections: {0}</value>
+  </data>
+  <data name="AdditionalSectionsTooltip" xml:space="preserve">
+    <value>Number of additional text sections to include in output after historical context</value>
+  </data>
   <data name="ExecutiveSummary" xml:space="preserve">
     <value>Executive Summary</value>
   </data>

@@ -57,6 +57,19 @@
                 </MudTooltip>
             </span>
         </MudSlider>
+        <MudSlider T="int"
+                   @bind-Value="_sectionCount"
+                   Min="1"
+                   Max="6"
+                   Step="1"
+                   ValueLabel>
+            <span class="d-inline-flex align-center gap-1">
+                @string.Format(Strings.AdditionalSections, _sectionCount)
+                <MudTooltip Text="@Strings.AdditionalSectionsTooltip">
+                    <MudIcon Icon="@Icons.Material.Outlined.Info" Size="Size.Small" Class="d-block" />
+                </MudTooltip>
+            </span>
+        </MudSlider>
     }
 
     @if (_loadingModel)

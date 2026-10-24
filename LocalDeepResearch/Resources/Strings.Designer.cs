@@ -200,6 +200,18 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
+        internal static string AdditionalSections {
+            get {
+                return ResourceManager.GetString("AdditionalSections", resourceCulture);
+            }
+        }
+
+        internal static string AdditionalSectionsTooltip {
+            get {
+                return ResourceManager.GetString("AdditionalSectionsTooltip", resourceCulture);
+            }
+        }
+
         internal static string ExecutiveSummary {
             get {
                 return ResourceManager.GetString("ExecutiveSummary", resourceCulture);
