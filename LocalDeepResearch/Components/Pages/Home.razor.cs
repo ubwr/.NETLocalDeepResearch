@@ -319,6 +319,20 @@ public partial class Home : IDisposable
         await JS.InvokeVoidAsync("downloadFileFromStream", $"{_plan.Title}.pdf", streamReference);
     }
     /// <summary>
+    /// Gets a model display name from its Id.
+    /// </summary>
+    /// <param name="value"> Model Id </param>
+    /// <returns> Model display name </returns>
+    private static string ModelName(string value)
+    {
+        GgufModelInfo? model = Models.FirstOrDefault(model => model.RepoId == value);
+
+        if (model is null)
+            return Strings.CustomModel;
+
+        return model.DisplayName;
+    }
+    /// <summary>
     /// Selects a new model to use for generation.
     /// </summary>
     /// <param name="value"> New model Id </param>

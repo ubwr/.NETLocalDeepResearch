@@ -22,12 +22,16 @@
         <MudSelect T="string"
                    Value="@_selectedModel"
                    ValueChanged="SelectModelAsync"
+                   ToStringFunc="ModelName"
                    Label="@Strings.Model"
                    Variant="Variant.Outlined"
                    Dense>
             @foreach (GgufModelInfo model in Models)
             {
-                <MudSelectItem Value="@model.RepoId">@model.DisplayName</MudSelectItem>
+                <MudSelectItem Value="@model.RepoId">
+                    <MudText Typo="Typo.body2">@model.DisplayName</MudText>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">@model.RepoId</MudText>
+                </MudSelectItem>
             }
             <MudSelectItem Value="@CustomModelOption">@Strings.CustomModel</MudSelectItem>
         </MudSelect>
