@@ -77,7 +77,7 @@
     <value>🗙</value>
   </data>
   <data name="TokenCount" xml:space="preserve">
-    <value>{0} tokens</value>
+    <value>{0:N0} tokens</value>
   </data>
   <data name="NotEnoughSites" xml:space="preserve">
     <value>Not enough relevant sites were found to answer this question.</value>
@@ -132,6 +132,9 @@
   </data>
   <data name="MinSitesTooltip" xml:space="preserve">
     <value>How many different websites a section requires before it can be written</value>
+  </data>
+  <data name="TokensPerSecond" xml:space="preserve">
+    <value>{0:F1} tok/s</value>
   </data>
   <data name="ExecutiveSummary" xml:space="preserve">
     <value>Executive Summary</value>

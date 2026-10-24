@@ -147,16 +147,16 @@
                 </MudExpansionPanels>
             }
 
-            @if (Chat.Result.HasValue)
+            @if (!_busy && Chat.TotalTokens > 0)
             {
-                var result = Chat.Result.Value;
-                double tokensPerSecond = result.Timings?.CompletionTokensPerSecond ?? 0;
-                TimeSpan duration = result.Timings?.CompletionDuration ?? TimeSpan.Zero;
+                double tokensPerSecond = 0;
+
+                if (Chat.TotalGenerationTime > TimeSpan.Zero)
+                    tokensPerSecond = Chat.TotalTokens / Chat.TotalGenerationTime.TotalSeconds;
 
                 <MudStack Row Spacing="3" Class="mt-4">
-                    <MudText Typo="Typo.caption">@($"{tokensPerSecond:F1} tok/s")</MudText>
-                    <MudText Typo="Typo.caption">@string.Format(Strings.TokenCount, result.Usage.CompletionTokens)</MudText>
-                    <MudText Typo="Typo.caption">@Helpers.FormatDuration(duration)</MudText>
+                    <MudText Typo="Typo.caption">@string.Format(Strings.TokensPerSecond, tokensPerSecond)</MudText>
+                    <MudText Typo="Typo.caption">@string.Format(Strings.TokenCount, Chat.TotalTokens)</MudText>
                 </MudStack>
             }
         </MudPaper>

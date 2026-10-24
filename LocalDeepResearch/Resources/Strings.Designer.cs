@@ -194,6 +194,12 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
+        internal static string TokensPerSecond {
+            get {
+                return ResourceManager.GetString("TokensPerSecond", resourceCulture);
+            }
+        }
+
         internal static string ExecutiveSummary {
             get {
                 return ResourceManager.GetString("ExecutiveSummary", resourceCulture);

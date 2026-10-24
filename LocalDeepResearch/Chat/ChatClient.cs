@@ -23,6 +23,14 @@ public class ChatClient
     /// Result of the local LLM text generation.
     /// </summary>
     public GenerationResult? Result { get; private set; }
+    /// <summary>
+    /// Total tokens used in a single run.
+    /// </summary>
+    public int TotalTokens { get; private set; }
+    /// <summary>
+    /// Total text generation time for a single run.
+    /// </summary>
+    public TimeSpan TotalGenerationTime { get; private set; }
 
     /// <summary>
     /// If our local LLM is loaded.
@@ -88,6 +96,8 @@ public class ChatClient
             ct);
 
         Result = result;
+        TotalTokens += result.Usage.CompletionTokens;
+        TotalGenerationTime += result.Timings?.CompletionDuration ?? TimeSpan.Zero;
 
         return result.Content;
     }
@@ -108,6 +118,14 @@ public class ChatClient
             CreateMessages(systemMessage, userMessage),
             CreateGenerationOptions(),
             ct);
+    }
+    /// <summary>
+    /// Resets the total token count and text generation time.
+    /// </summary>
+    public void ResetTokenTotals()
+    {
+        TotalTokens = 0;
+        TotalGenerationTime = TimeSpan.Zero;
     }
     /// <summary>
     /// Creates total prompt for our local LLM.

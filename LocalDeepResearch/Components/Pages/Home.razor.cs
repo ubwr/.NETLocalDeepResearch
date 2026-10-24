@@ -190,6 +190,7 @@ public partial class Home : IDisposable
         _runStatus = null;
         _plan = null;
         _summary = null;
+        Chat.ResetTokenTotals();
         _skippedSections = new();
         _failedSections = new();
         _cancellation = new CancellationTokenSource();
