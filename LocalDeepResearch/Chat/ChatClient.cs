@@ -17,8 +17,13 @@ public class ChatClient
     public ChatClient(IOptions<ChatOptions> options)
     {
         _options = options.Value;
+        ModelId = _options.ModelId;
     }
     
+    /// <summary>
+    /// Id of local model to use for generation.
+    /// </summary>
+    public string ModelId { get; private set; }
     /// <summary>
     /// Result of the local LLM text generation.
     /// </summary>
@@ -48,13 +53,21 @@ public class ChatClient
     /// <summary>
     /// Does the initial loading of our local LLM.
     /// </summary>
+    /// <param name="modelId"> Id of local model to use for generation </param>
     /// <param name="progress"> Current download progress for our local LLM </param>
     /// <param name="ct"> Cancellation token </param>
-    public async Task LoadAsync(IProgress<DownloadProgress>? progress = null, CancellationToken ct = default)
+    public async Task LoadAsync(string modelId, IProgress<DownloadProgress>? progress = null, CancellationToken ct = default)
     {
-        if (IsModelLoaded)
+        if (IsModelLoaded && modelId == ModelId)
             return;
-        
+
+        // Clear previously loaded model
+        if (_generatorModel is not null)
+        {
+            await _generatorModel.DisposeAsync();
+            _generatorModel = null;
+        }
+
         // Allow custom context lengths
         var generatorOptions = new GeneratorOptions
         {
@@ -71,10 +84,12 @@ public class ChatClient
         }
 
         _generatorModel = await LocalGenerator.LoadAsync(
-            _options.ModelId,
+            modelId,
             generatorOptions,
             progress: progress,
             cancellationToken: ct);
+        
+        ModelId = modelId;
     }
     /// <summary>
     /// Sends a request to our local LLM with a given prompt.

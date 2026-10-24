@@ -145,7 +145,7 @@ public partial class Home : IDisposable
 
         try
         {
-            await Chat.LoadAsync(progress);
+            await Chat.LoadAsync(Chat.ModelId, progress);
             await Reranker.LoadAsync(progress);
         }
         catch (Exception ex)
