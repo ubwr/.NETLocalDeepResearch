@@ -25,38 +25,67 @@ public static class PromptHelper
     /// Custom system message to include when we need to generate a research plan.
     /// </summary>
     /// <param name="sectionCount"> Number of additional text sections to include in output after historical context </param>
-    public static string PlannerSystemMessage(int sectionCount)
+    /// <param name="includeHistory"> If the finished research report should explicitly include historical context </param>
+    public static string PlannerSystemMessage(int sectionCount, bool includeHistory)
     {
-        return "You are a research planner. " +
-            "Write a short title for the report. " +
-            "Write one subquestion about the history of the topic. " +
-            $"Then break the user's research question into exactly {sectionCount} subquestions that together fully answer it, " +
-            "ordered so a report built from them reads naturally, from background to specifics. " +
-            "Do not include any subquestions about history, since history is handled separately. " +
-            "For each subquestion, give a short section heading and a short, concise, self-contained question. " +
-            "Do not include a summary or introduction.";
+        var builder = new StringBuilder();
+
+        builder.Append("You are a research planner. ");
+        builder.Append("Write a short title for the report. ");
+
+        if (includeHistory)
+        {
+            builder.Append("Write one subquestion about the history of the topic. ");
+            builder.Append($"Then break the user's research question into exactly {sectionCount} subquestions that together fully answer it, ");
+        }
+        else
+        {
+            builder.Append($"Break the user's research question into exactly {sectionCount} subquestions that together fully answer it, ");
+        }
+
+        builder.Append("ordered so a report built from them reads naturally, from background to specifics. ");
+
+        if (includeHistory)
+            builder.Append("Do not include any subquestions about history, since history is handled separately. ");
+
+        builder.Append("For each subquestion, give a short section heading and a short, concise, self-contained question. ");
+        builder.Append("Do not include a summary or introduction.");
+
+        return builder.ToString();
     }
 
     /// <summary>
     /// JSON schema to use for our research plan.
     /// </summary>
     /// <param name="sectionCount"> Number of additional text sections to include in output after historical context </param>
-    public static string PlanSchema(int sectionCount)
+    /// <param name="includeHistory"> If the finished research report should explicitly include historical context </param>
+    public static string PlanSchema(int sectionCount, bool includeHistory)
     {
+        string historyProperty = string.Empty;
+        string historyRequired = string.Empty;
+
+        if (includeHistory)
+        {
+            historyProperty = """
+                "history": {
+                  "type": "object",
+                  "properties": {
+                    "heading": { "type": "string" },
+                    "question": { "type": "string" }
+                  },
+                  "required": ["heading", "question"],
+                  "additionalProperties": false
+                },
+                """;
+            historyRequired = "\"history\", ";
+        }
+
         return $$"""
         {
           "type": "object",
           "properties": {
             "title": { "type": "string" },
-            "history": {
-              "type": "object",
-              "properties": {
-                "heading": { "type": "string" },
-                "question": { "type": "string" }
-              },
-              "required": ["heading", "question"],
-              "additionalProperties": false
-            },
+            {{historyProperty}}
             "subQuestions": {
               "type": "array",
               "minItems": {{sectionCount}},
@@ -72,7 +101,7 @@ public static class PromptHelper
               }
             }
           },
-          "required": ["title", "history", "subQuestions"],
+          "required": ["title", {{historyRequired}}"subQuestions"],
           "additionalProperties": false
         }
         """;

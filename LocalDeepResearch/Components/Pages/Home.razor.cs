@@ -35,9 +35,13 @@ public partial class Home : IDisposable
     /// </summary>
     private int _sectionCount = 4;
     /// <summary>
-    /// If we should include an executive summary in the finished research report.
+    /// If the finished research report should include an executive summary.
     /// </summary>
     private bool _includeSummary = true;
+    /// <summary>
+    /// If the finished research report should explicitly include historical context.
+    /// </summary>
+    private bool _includeHistory = true;
     /// <summary>
     /// Selected item from the model dropdown.
     /// </summary>
@@ -290,12 +294,16 @@ public partial class Home : IDisposable
             StateHasChanged();
 
             // Get our list of subquestions
-            string planJson = await Chat.AskAsync(PromptHelper.PlannerSystemMessage(_sectionCount), query, PromptHelper.PlanSchema(_sectionCount), ct);
+            string planJson = await Chat.AskAsync(PromptHelper.PlannerSystemMessage(_sectionCount, _includeHistory), query, PromptHelper.PlanSchema(_sectionCount, _includeHistory), ct);
             _plan = JsonSerializer.Deserialize<ResearchPlan>(planJson, ModelJson)
                 ?? throw new InvalidOperationException("Failed to create a research plan.");
             StateHasChanged();
 
-            List<SubQuestion> subQuestions = new() { _plan.History };
+            List<SubQuestion> subQuestions = new();
+
+            if (_plan.History is not null)
+                subQuestions.Add(_plan.History);
+
             subQuestions.AddRange(_plan.SubQuestions);
 
             foreach (SubQuestion subQuestion in subQuestions)

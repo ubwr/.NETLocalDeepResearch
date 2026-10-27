@@ -157,6 +157,9 @@
   <data name="IncludeSummary" xml:space="preserve">
     <value>Include executive summary</value>
   </data>
+  <data name="IncludeHistory" xml:space="preserve">
+    <value>Include historical context</value>
+  </data>
   <data name="ExecutiveSummary" xml:space="preserve">
     <value>Executive Summary</value>
   </data>

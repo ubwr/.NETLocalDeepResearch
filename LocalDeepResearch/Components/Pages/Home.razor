@@ -101,6 +101,7 @@
             </span>
         </MudSlider>
         <MudCheckBox T="bool" @bind-Value="_includeSummary" Label="@Strings.IncludeSummary" Dense />
+        <MudCheckBox T="bool" @bind-Value="_includeHistory" Label="@Strings.IncludeHistory" Dense />
     }
 
     @if (_loadingModel)
