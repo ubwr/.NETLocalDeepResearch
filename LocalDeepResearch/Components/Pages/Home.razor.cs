@@ -246,13 +246,22 @@ public partial class Home : IDisposable
     }
 
     /// <summary>
-    /// When the user hits 'Enter', fire off the API call to use our local models.
+    /// When the user hits 'Enter', start deep research.
     /// </summary>
     /// <param name="args"> Keyboard event </param>
-    private async Task OnKeyDown(KeyboardEventArgs args)
+    private async Task OnPromptKeyDown(KeyboardEventArgs args)
     {
-        if (args.Key == "Enter" && !args.ShiftKey)
+        if (args.Key == "Enter")
             await AskAsync();
+    }
+    /// <summary>
+    /// When the user hits 'Enter', try to load custom model.
+    /// </summary>
+    /// <param name="args"> Keyboard event </param>
+    private async Task OnCustomModelKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+            await SwitchModelAsync(_customModelId);
     }
     /// <summary>
     /// Sends our research request with the user's prompt.

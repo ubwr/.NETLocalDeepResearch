@@ -25,7 +25,7 @@
                   Immediate
                   MaxLength="100"
                   Disabled="_busy || _loadingModel"
-                  OnKeyDown="OnKeyDown"
+                  OnKeyDown="OnPromptKeyDown"
                   FullWidth />
 
     @if (!_busy && !_loadingModel && Chat.IsModelLoaded && Reranker.IsModelLoaded)
@@ -53,7 +53,10 @@
                 <MudTextField @bind-Value="_customModelId"
                               Placeholder="@Strings.CustomModelPlaceholder"
                               Variant="Variant.Outlined"
-                              Margin="Margin.Dense" />
+                              Margin="Margin.Dense"
+                              Immediate
+                              MaxLength="100"
+                              OnKeyDown="OnCustomModelKeyDown" />
                 <MudButton Variant="Variant.Outlined"
                            OnClick="() => SwitchModelAsync(_customModelId)">@Strings.LoadModel</MudButton>
             </MudStack>
