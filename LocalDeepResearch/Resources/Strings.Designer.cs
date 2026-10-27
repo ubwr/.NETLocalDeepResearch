@@ -236,6 +236,12 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
+        internal static string IncludeSummary {
+            get {
+                return ResourceManager.GetString("IncludeSummary", resourceCulture);
+            }
+        }
+
         internal static string ExecutiveSummary {
             get {
                 return ResourceManager.GetString("ExecutiveSummary", resourceCulture);

@@ -100,6 +100,7 @@
                 </MudTooltip>
             </span>
         </MudSlider>
+        <MudCheckBox T="bool" @bind-Value="_includeSummary" Label="@Strings.IncludeSummary" Dense />
     }
 
     @if (_loadingModel)
@@ -139,7 +140,7 @@
                 @(Chat.IsGpuActive ? "GPU" : "CPU")
             </MudChip>
             <MudSpacer />
-            @if (_summary is not null && !_busy)
+            @if (_plan is not null && _sections.Count > 0 && !_busy)
             {
                 <MudButton Variant="Variant.Outlined"
                            Size="Size.Small"

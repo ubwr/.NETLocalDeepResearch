@@ -154,6 +154,9 @@
   <data name="LoadModel" xml:space="preserve">
     <value>Load</value>
   </data>
+  <data name="IncludeSummary" xml:space="preserve">
+    <value>Include executive summary</value>
+  </data>
   <data name="ExecutiveSummary" xml:space="preserve">
     <value>Executive Summary</value>
   </data>

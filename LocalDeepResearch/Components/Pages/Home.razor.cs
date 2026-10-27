@@ -35,6 +35,10 @@ public partial class Home : IDisposable
     /// </summary>
     private int _sectionCount = 4;
     /// <summary>
+    /// If we should include an executive summary in the finished research report.
+    /// </summary>
+    private bool _includeSummary = true;
+    /// <summary>
     /// Selected item from the model dropdown.
     /// </summary>
     private string _selectedModel = string.Empty;
@@ -319,6 +323,9 @@ public partial class Home : IDisposable
                 return;
             }
 
+            if (!_includeSummary)
+                return;
+
             _runStatus = Strings.StatusSummary;
             StateHasChanged();
 
@@ -347,7 +354,7 @@ public partial class Home : IDisposable
     /// </summary>
     private async Task DownloadPdfAsync()
     {
-        if (_plan is null || _summary is null)
+        if (_plan is null)
             return;
 
         byte[] pdf = ReportPdf.Create(_plan.Title, _summary, _sections);

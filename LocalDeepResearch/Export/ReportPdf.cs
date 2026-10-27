@@ -19,10 +19,10 @@ public static class ReportPdf
     /// Creates a downloadable research report PDF.
     /// </summary>
     /// <param name="title"> Research report title </param>
-    /// <param name="summary"> Research report executive summary </param>
+    /// <param name="summary"> Optional research report executive summary </param>
     /// <param name="sections"> Research report sections </param>
     /// <returns> Byte array of the research report PDF </returns>
-    public static byte[] Create(string title, string summary, IReadOnlyList<Section> sections)
+    public static byte[] Create(string title, string? summary, IReadOnlyList<Section> sections)
     {
         return Document.Create(document =>
         {
@@ -39,8 +39,9 @@ public static class ReportPdf
                     // Title
                     column.Item().AlignCenter().Text(title).FontSize(20).Bold();
 
-                    // Executive summary
-                    AddSection(column, Strings.ExecutiveSummary, summary);
+                    // Optional executive summary
+                    if (summary is not null)
+                        AddSection(column, Strings.ExecutiveSummary, summary);
 
                     // Text sections from subquestions
                     foreach (Section section in sections)
