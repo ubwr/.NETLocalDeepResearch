@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text.Json;
 using LMSupply;
 using LMSupply.Generator.Gguf;
@@ -9,6 +10,7 @@ using LocalDeepResearch.Reranking;
 using LocalDeepResearch.Research;
 using LocalDeepResearch.Search;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 
@@ -44,8 +46,14 @@ public partial class Home : IDisposable
     /// Maximum text length in chars a single source can be.
     /// </summary>
     private const int MaxSourceLengthChars = 100;
-    
+    /// <summary>
+    /// Custom model dropdown value.
+    /// </summary>
     private const string CustomModelOption = "custom";
+    /// <summary>
+    /// Key for model Id information saved in browser storage.
+    /// </summary>
+    private const string ModelStorageKey = "modelId";
 
     /// <summary>
     /// List of default models included by LMSupply.
@@ -64,6 +72,7 @@ public partial class Home : IDisposable
     [Inject] private PageClient Pages { get; set; }
     [Inject] private ResearchLock ResearchLock { get; set; }
     [Inject] private IJSRuntime JS { get; set; }
+    [Inject] private ProtectedLocalStorage LocalStorage { get; set; }
 
     /// <summary>
     /// Prompt to the local LLM.
@@ -143,6 +152,43 @@ public partial class Home : IDisposable
         _pageThreshold = Reranker.PageThreshold;
         _passageThreshold = Reranker.PassageThreshold;
 
+        SyncModelSelection();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Exit early if our models are already downloaded
+        if (!firstRender || (Chat.IsModelLoaded && Reranker.IsModelLoaded))
+            return;
+
+        string modelId = Chat.ModelId;
+
+        try
+        {
+            var savedModel = await LocalStorage.GetAsync<string>(ModelStorageKey);
+
+            if (savedModel.Success && !string.IsNullOrWhiteSpace(savedModel.Value))
+                modelId = savedModel.Value;
+        }
+        catch (CryptographicException)
+        {
+            await LocalStorage.DeleteAsync(ModelStorageKey);
+        }
+
+        await LoadModelsAsync(modelId);
+
+        if (modelId != Chat.ModelId)
+            await LoadModelsAsync(Chat.ModelId);
+
+        SyncModelSelection();
+        StateHasChanged();
+    }
+    
+    /// <summary>
+    /// Sync model picker selection with value saved in browser storage.
+    /// </summary>
+    private void SyncModelSelection()
+    {
         // If our currently loaded model exists in the dropdown, then set that as the selected item
         if (Models.Any(model => model.RepoId == Chat.ModelId))
         {
@@ -154,16 +200,6 @@ public partial class Home : IDisposable
             _selectedModel = CustomModelOption;
             _customModelId = Chat.ModelId;
         }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        // Exit early if our models are already downloaded
-        if (!firstRender || (Chat.IsModelLoaded && Reranker.IsModelLoaded))
-            return;
-
-        // Load our default model immediately
-        await LoadModelsAsync(Chat.ModelId);
     }
     /// <summary>
     /// Downloads a model for text generation and a model for reranking.
@@ -185,6 +221,7 @@ public partial class Home : IDisposable
         try
         {
             await Chat.LoadAsync(modelId, progress);
+            await LocalStorage.SetAsync(ModelStorageKey, modelId);
             await Reranker.LoadAsync(progress);
         }
         catch (Exception ex)
