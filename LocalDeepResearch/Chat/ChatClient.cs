@@ -29,7 +29,7 @@ public class ChatClient
     /// </summary>
     public GenerationResult? Result { get; private set; }
     /// <summary>
-    /// Total tokens used in a single run.
+    /// Total text generation tokens used in a single run.
     /// </summary>
     public int TotalTokens { get; private set; }
     /// <summary>
@@ -51,10 +51,10 @@ public class ChatClient
     public int PromptTokenBudget => (_generatorModel?.MaxContextLength ?? 0) - _options.MaxOutputTokens;
 
     /// <summary>
-    /// Does the initial loading of our local LLM.
+    /// Loads a local LLM.
     /// </summary>
     /// <param name="modelId"> Id of local model to use for generation </param>
-    /// <param name="progress"> Current download progress for our local LLM </param>
+    /// <param name="progress"> Current download progress for a local LLM </param>
     /// <param name="ct"> Cancellation token </param>
     public async Task LoadAsync(string modelId, IProgress<DownloadProgress>? progress = null, CancellationToken ct = default)
     {

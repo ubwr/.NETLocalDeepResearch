@@ -28,7 +28,7 @@
                    Dense>
             @foreach (GgufModelInfo model in Models)
             {
-                <MudSelectItem Value="@model.RepoId">
+                <MudSelectItem Value="@model.AliasName">
                     <MudText Typo="Typo.body2">@model.DisplayName</MudText>
                     <MudText Typo="Typo.caption" Class="mud-text-secondary">@model.RepoId</MudText>
                 </MudSelectItem>

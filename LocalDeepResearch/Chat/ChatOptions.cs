@@ -5,7 +5,7 @@ namespace LocalDeepResearch.Chat;
 /// </summary>
 public class ChatOptions
 {
-    public string ModelId { get; set; } = "Qwen/Qwen3-8B-GGUF";
+    public string ModelId { get; set; } = "gguf:qwen3-balanced";
     public string? ServerBinaryPath { get; set; }
     public int? MaxContextLength { get; set; }
     public int MaxOutputTokens { get; set; } = 2000;

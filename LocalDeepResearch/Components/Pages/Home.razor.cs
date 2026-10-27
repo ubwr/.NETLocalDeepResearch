@@ -58,8 +58,10 @@ public partial class Home : IDisposable
     /// <summary>
     /// List of default models included by LMSupply.
     /// </summary>
-    private static readonly IReadOnlyList<GgufModelInfo> Models = GgufModelRegistry.GetAllModels()
-        .DistinctBy(model => model.RepoId)
+    private static readonly IReadOnlyList<GgufModelInfo> Models = GgufModelRegistry.GetAliases()
+        .Where(alias => alias != "gguf:auto")
+        .Select(alias => GgufModelRegistry.Resolve(alias))
+        .OfType<GgufModelInfo>()
         .ToList();
 
     private static readonly JsonSerializerOptions ModelJson = new(JsonSerializerDefaults.Web);
@@ -115,7 +117,7 @@ public partial class Home : IDisposable
     /// </summary>
     private string? _loadingStatus;
     /// <summary>
-    /// Current status on our source and passage retrieval and scoring.
+    /// Current stage of the research run.
     /// </summary>
     private string? _runStatus;
     /// <summary>
@@ -185,12 +187,12 @@ public partial class Home : IDisposable
     }
     
     /// <summary>
-    /// Sync model picker selection with value saved in browser storage.
+    /// Sets the model dropdown value to the value of the currently loaded model.
     /// </summary>
     private void SyncModelSelection()
     {
         // If our currently loaded model exists in the dropdown, then set that as the selected item
-        if (Models.Any(model => model.RepoId == Chat.ModelId))
+        if (Models.Any(model => model.AliasName == Chat.ModelId))
         {
             _selectedModel = Chat.ModelId;
         }
@@ -202,7 +204,7 @@ public partial class Home : IDisposable
         }
     }
     /// <summary>
-    /// Downloads a model for text generation and a model for reranking.
+    /// Downloads a model for text generation and a model for reranking and saves model Id to browser storage.
     /// </summary>
     /// <param name="modelId"> Id of the model to download </param>
     private async Task LoadModelsAsync(string modelId)
@@ -358,11 +360,11 @@ public partial class Home : IDisposable
     /// <summary>
     /// Gets a model display name from its Id.
     /// </summary>
-    /// <param name="value"> Model Id </param>
+    /// <param name="modelId"> Model Id </param>
     /// <returns> Model display name </returns>
-    private static string ModelName(string value)
+    private static string ModelName(string modelId)
     {
-        GgufModelInfo? model = Models.FirstOrDefault(model => model.RepoId == value);
+        GgufModelInfo? model = Models.FirstOrDefault(model => model.AliasName == modelId);
 
         if (model is null)
             return Strings.CustomModel;
@@ -372,13 +374,13 @@ public partial class Home : IDisposable
     /// <summary>
     /// Selects a new model to use for generation.
     /// </summary>
-    /// <param name="value"> New model Id </param>
-    private async Task SelectModelAsync(string value)
+    /// <param name="modelId"> New model Id </param>
+    private async Task SelectModelAsync(string modelId)
     {
-        _selectedModel = value;
+        _selectedModel = modelId;
 
-        if (value != CustomModelOption)
-            await SwitchModelAsync(value);
+        if (modelId != CustomModelOption)
+            await SwitchModelAsync(modelId);
     }
     /// <summary>
     /// Switches the local model used for generation. 
@@ -432,7 +434,7 @@ public partial class Home : IDisposable
     /// <param name="subQuestion"> Subquestion to research </param>
     /// <param name="otherHeadings"> Other section headings so that output information is not duplicated </param>
     /// <param name="ct"> Cancellation token </param>
-    /// <returns> Completed research section </returns>
+    /// <returns> Completed research section, or null if a section was skipped </returns>
     private async Task<Section?> ResearchAsync(SubQuestion subQuestion, IReadOnlyList<string> otherHeadings, CancellationToken ct)
     {
         string question = subQuestion.Question;
