@@ -8,5 +8,9 @@ obj/
 .idea/
 .vs/
 
+## Local machine config
+appsettings.Development.json
+.env
+
 ## OS
 .DS_Store
