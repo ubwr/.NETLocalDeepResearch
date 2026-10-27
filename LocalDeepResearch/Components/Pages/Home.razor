@@ -6,6 +6,17 @@
 <PageTitle>@Strings.AppTitle</PageTitle>
 
 <MudStack Spacing="4" Class="py-8">
+    @if (Chat.IsModelLoaded)
+    {
+        <MudChip T="string"
+                 Size="Size.Small"
+                 Variant="Variant.Outlined"
+                 Class="align-self-start"
+                 Color="@(Chat.IsGpuActive ? Color.Success : Color.Warning)">
+            @(Chat.IsGpuActive ? "GPU" : "CPU")
+        </MudChip>
+    }
+
     <MudTextField @bind-Value="_prompt"
                   Placeholder="@Strings.SearchPlaceholder"
                   Variant="Variant.Outlined"
@@ -154,24 +165,14 @@
         </MudStack>
     }
 
-    @if (Chat.IsModelLoaded)
+    @if (_plan is not null && _sections.Count > 0 && !_busy)
     {
-        <MudStack Row AlignItems="AlignItems.Center">
-            <MudChip T="string"
-                     Size="Size.Small"
-                     Variant="Variant.Outlined"
-                     Color="@(Chat.IsGpuActive ? Color.Success : Color.Warning)">
-                @(Chat.IsGpuActive ? "GPU" : "CPU")
-            </MudChip>
-            <MudSpacer />
-            @if (_plan is not null && _sections.Count > 0 && !_busy)
-            {
-                <MudButton Variant="Variant.Outlined"
-                           Size="Size.Small"
-                           StartIcon="@Icons.Material.Outlined.Download"
-                           OnClick="DownloadPdfAsync">@Strings.DownloadPdf</MudButton>
-            }
-        </MudStack>
+        <div class="d-flex justify-end">
+            <MudButton Variant="Variant.Outlined"
+                       Size="Size.Small"
+                       StartIcon="@Icons.Material.Outlined.Download"
+                       OnClick="DownloadPdfAsync">@Strings.DownloadPdf</MudButton>
+        </div>
     }
 
     @if (_error is not null)
