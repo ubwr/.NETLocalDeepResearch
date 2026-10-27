@@ -102,6 +102,15 @@
         </MudSlider>
         <MudCheckBox T="bool" @bind-Value="_includeSummary" Label="@Strings.IncludeSummary" Dense />
         <MudCheckBox T="bool" @bind-Value="_includeHistory" Label="@Strings.IncludeHistory" Dense />
+
+        <div class="d-flex justify-center">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       DropShadow="false"
+                       StartIcon="@Icons.Material.Outlined.Search"
+                       Disabled="@string.IsNullOrWhiteSpace(_prompt)"
+                       OnClick="AskAsync">@Strings.SearchButton</MudButton>
+        </div>
     }
 
     @if (_loadingModel)

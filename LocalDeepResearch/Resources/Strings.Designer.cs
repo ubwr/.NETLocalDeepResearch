@@ -248,6 +248,12 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
+        internal static string SearchButton {
+            get {
+                return ResourceManager.GetString("SearchButton", resourceCulture);
+            }
+        }
+
         internal static string ExecutiveSummary {
             get {
                 return ResourceManager.GetString("ExecutiveSummary", resourceCulture);

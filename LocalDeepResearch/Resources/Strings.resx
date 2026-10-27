@@ -160,6 +160,9 @@
   <data name="IncludeHistory" xml:space="preserve">
     <value>Include historical context</value>
   </data>
+  <data name="SearchButton" xml:space="preserve">
+    <value>Search</value>
+  </data>
   <data name="ExecutiveSummary" xml:space="preserve">
     <value>Executive Summary</value>
   </data>
