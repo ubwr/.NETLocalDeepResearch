@@ -254,6 +254,18 @@ namespace LocalDeepResearch.Resources {
             }
         }
 
+        internal static string IncludeSummaryTooltip {
+            get {
+                return ResourceManager.GetString("IncludeSummaryTooltip", resourceCulture);
+            }
+        }
+
+        internal static string IncludeHistoryTooltip {
+            get {
+                return ResourceManager.GetString("IncludeHistoryTooltip", resourceCulture);
+            }
+        }
+
         internal static string ExecutiveSummary {
             get {
                 return ResourceManager.GetString("ExecutiveSummary", resourceCulture);

@@ -100,8 +100,22 @@
                 </MudTooltip>
             </span>
         </MudSlider>
-        <MudCheckBox T="bool" @bind-Value="_includeSummary" Label="@Strings.IncludeSummary" Dense />
-        <MudCheckBox T="bool" @bind-Value="_includeHistory" Label="@Strings.IncludeHistory" Dense />
+        <MudCheckBox T="bool" @bind-Value="_includeSummary" Dense>
+            <span class="d-inline-flex align-center gap-1">
+                @Strings.IncludeSummary
+                <MudTooltip Text="@Strings.IncludeSummaryTooltip">
+                    <MudIcon Icon="@Icons.Material.Outlined.Info" Size="Size.Small" Class="d-block" />
+                </MudTooltip>
+            </span>
+        </MudCheckBox>
+        <MudCheckBox T="bool" @bind-Value="_includeHistory" Dense>
+            <span class="d-inline-flex align-center gap-1">
+                @Strings.IncludeHistory
+                <MudTooltip Text="@Strings.IncludeHistoryTooltip">
+                    <MudIcon Icon="@Icons.Material.Outlined.Info" Size="Size.Small" Class="d-block" />
+                </MudTooltip>
+            </span>
+        </MudCheckBox>
 
         <div class="d-flex justify-center">
             <MudButton Variant="Variant.Filled"

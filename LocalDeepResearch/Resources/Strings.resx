@@ -140,7 +140,7 @@
     <value>Additional sections: {0}</value>
   </data>
   <data name="AdditionalSectionsTooltip" xml:space="preserve">
-    <value>Number of additional text sections to include in output after historical context</value>
+    <value>Number of additional text sections to include in output, excluding historical context</value>
   </data>
   <data name="Model" xml:space="preserve">
     <value>Model</value>
@@ -162,6 +162,12 @@
   </data>
   <data name="SearchButton" xml:space="preserve">
     <value>Search</value>
+  </data>
+  <data name="IncludeSummaryTooltip" xml:space="preserve">
+    <value>Adds an overarching summary of the full research report</value>
+  </data>
+  <data name="IncludeHistoryTooltip" xml:space="preserve">
+    <value>Explicitly includes a section on historical context in the finished research report</value>
   </data>
   <data name="ExecutiveSummary" xml:space="preserve">
     <value>Executive Summary</value>
