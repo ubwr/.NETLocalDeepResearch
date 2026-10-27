@@ -26,8 +26,16 @@ The finished report can be downloaded as a PDF.
 
 Create a `.env` file in the repository root with a random secret:
 
+**macOS / Linux**
+
 ```bash
 echo "SEARXNG_SECRET=$(openssl rand -hex 32)" > .env
+```
+
+**Windows (PowerShell)**
+
+```powershell
+$b = [byte[]]::new(32); [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); "SEARXNG_SECRET=$(-join ($b | % { $_.ToString('x2') }))" | Set-Content .env -Encoding ascii
 ```
 
 Then start SearXNG:
