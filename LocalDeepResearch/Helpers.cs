@@ -6,21 +6,6 @@ namespace LocalDeepResearch;
 public static class Helpers
 {
     /// <summary>
-    /// Converts a timespan into a formatted string.
-    /// </summary>
-    /// <param name="duration"> Total duration to format </param>
-    /// <returns> Formatted time string </returns>
-    public static string FormatDuration(TimeSpan duration)
-    {
-        if (duration.TotalHours >= 1)
-            return duration.ToString(@"h\:mm\:ss");
-
-        if (duration.TotalMinutes >= 1)
-            return duration.ToString(@"m\:ss");
-
-        return duration.ToString(@"s\s");
-    }
-    /// <summary>
     /// Truncates text to a given length.
     /// </summary>
     /// <param name="text"> Text to truncate </param>

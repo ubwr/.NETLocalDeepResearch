@@ -25,10 +25,6 @@ public class ChatClient
     /// </summary>
     public string ModelId { get; private set; }
     /// <summary>
-    /// Result of the local LLM text generation.
-    /// </summary>
-    public GenerationResult? Result { get; private set; }
-    /// <summary>
     /// Total text generation tokens used in a single run.
     /// </summary>
     public int TotalTokens { get; private set; }
@@ -110,7 +106,6 @@ public class ChatClient
             CreateGenerationOptions(jsonSchema),
             ct);
 
-        Result = result;
         TotalTokens += result.Usage.CompletionTokens;
         TotalGenerationTime += result.Timings?.CompletionDuration ?? TimeSpan.Zero;
 
