@@ -4,7 +4,7 @@ namespace LocalDeepResearch.Search;
 /// </summary>
 public class SearxngOptions
 {
-    public string Url { get; set; } = "http://localhost:8080";
+    public string Url { get; set; } = "http://127.0.0.1:8080";
     public string Categories { get; set; } = "general,science";
     public string Language { get; set; } = "en";
     public int MaxResults { get; set; } = 100;

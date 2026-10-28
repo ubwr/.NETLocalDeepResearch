@@ -38,13 +38,13 @@ echo "SEARXNG_SECRET=$(openssl rand -hex 32)" > .env
 $b = [byte[]]::new(32); [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); "SEARXNG_SECRET=$(-join ($b | % { $_.ToString('x2') }))" | Set-Content .env -Encoding ascii
 ```
 
-Then start SearXNG:
+Ensure Docker is running, then start SearXNG:
 
 ```bash
 docker compose up -d
 ```
 
-SearXNG runs on `http://localhost:8080` and is only reachable from your own machine. Its settings live in `searxng/settings.yml`. Additional documentation for SearXNG settings can be found [here](https://docs.searxng.org/admin/settings/index.html).
+SearXNG runs on `http://127.0.0.1:8080` and is only reachable from your own machine. Its settings live in `searxng/settings.yml`. Additional documentation for SearXNG settings can be found [here](https://docs.searxng.org/admin/settings/index.html).
 
 ### 2. Run the app
 
@@ -59,7 +59,7 @@ The first run downloads llama-server, the default language model, and the rerank
 
 ## Research
 
-- **Model:** pick one of the built-in models, or choose **Custom** and enter a compatible Hugging Face GGUF model ID. If a model fails to load, the app falls back to its configured default.
+- **Model:** pick one of the built-in models, or choose **Custom** and enter a compatible Hugging Face GGUF model ID. If a model fails to load, the app falls back to the previously loaded model.
 - **Page relevance threshold:** how relevant a search result must be for its page to be fetched.
 - **Passage relevance threshold:** how relevant a text passage must be for it to be used as context for a section.
 - **Minimum sites per section:** how many different websites a section requires before it can be written.
@@ -81,7 +81,7 @@ Defaults live in `LocalDeepResearch/appsettings.json`.
 | `Chat:Temperature` | `0.3` | Controls randomness in token selection                         |
 | `Reranker:PageThreshold` | `0.5` | Default page relevance threshold             |
 | `Reranker:PassageThreshold` | `0.95` | Default passage relevance threshold          |
-| `Searxng:Url` | `http://localhost:8080` | SearXNG address                              |
+| `Searxng:Url` | `http://127.0.0.1:8080` | SearXNG address                              |
 | `Searxng:Categories` | `general,science` | SearXNG categories to search                 |
 | `Searxng:MaxResults` | `100` | Maximum search results per subquestion       |
 | `Searxng:PageCount` | `2` | Search result pages requested per subquestion |
